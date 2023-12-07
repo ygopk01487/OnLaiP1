@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+
+@layer base {
+  * {
+    @apply p-0 m-0 box-border;
+  }
+  body {
+    @apply bg-slate-100 overflow-hidden;
+  }
+}
+
+@layer components {
+  .input-login {
+    @apply bg-slate-200 rounded-[20px] p-3 w-[100%]
+    text-black font-normal outline-none pl-[40px] relative focus:border-black border-[2px];
+  }
+  .icon-input-login {
+    @apply absolute top-[40%] left-[10%];
+  }
+  .text-forget-pass {
+    @apply text-[14px] font-normal text-slate-400 text-center cursor-pointer hover:text-slate-600 duration-500 p-2;
+  }
+  .icon-input-signInTwo {
+    @apply absolute top-[53%] left-[5%];
+  }
+  .icon-eyes-show {
+    @apply absolute right-[5%] bottom-[22%] cursor-pointer;
+  }
+  .input-inner-outer-type-number {
+    @apply [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none;
+  }
+
+  /* show toast */
+  #toast.active {
+    @apply translate-x-[0%];
+  }
+  #progress::before.active {
+    @apply animate-progress;
+  }
+}
