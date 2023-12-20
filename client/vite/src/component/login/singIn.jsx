@@ -9,21 +9,18 @@ import { useNavigate } from "react-router-dom";
 import { singIns } from "../../action/users";
 import { Cookies } from "react-cookie";
 import LoginGoogle from "./loginOther/loginGoogle";
-import { gapi } from "gapi-script";
 import LoginFacebook from "./loginOther/loginFacebook";
 import TextValidateForm from "./textValidateForm";
 import Loading from "../loading/Loading";
 import Toast from "../toast/Toast";
 import { closeToast, showToast } from "../toast/ShowToast";
 
-//id google
-const clientID =
-  "416329735082-fitll6hgsqdubjfs7pqkqae1p9kdks41.apps.googleusercontent.com";
-
 const SingIn = () => {
   const [showPass, setShowPass] = useState(false);
 
   const [data, setData] = useState({ email: "", password: "" });
+
+  const [login, setLogin] = useState("Login");
 
   const [textCheck, setTextCheck] = useState("");
   const [passCheck, setPassCheck] = useState("");
@@ -56,7 +53,7 @@ const SingIn = () => {
       if (datas) {
         cookies.set("access_token", datas.accessToken);
         cookies.set("refresh_token", datas.refreshToken);
-        navigate("/trang-chu", { state: { res: "" } });
+        navigate("/trang-chu", { state: { login } });
         alert("Thanh cong");
       } else {
         setCheckToast(false);
@@ -130,14 +127,6 @@ const SingIn = () => {
     }
   };
 
-  //login google
-  const start = () => {
-    gapi.auth2.init({
-      clientId: clientID,
-      scope: "",
-    });
-  };
-
   //loading
   const loadingPage = () => {
     setTimeout(() => {
@@ -158,9 +147,6 @@ const SingIn = () => {
   }, [submit]);
 
   useEffect(() => {
-    gapi.load("client:auth2", start);
-
-    //loading
     loadingPage();
   }, []);
 
@@ -223,7 +209,7 @@ const SingIn = () => {
                   <span className="text-[12px] p-2 font-medium">Hoặc</span>
                   <div>
                     <LoginGoogle />
-                    {/* <LoginFacebook /> */}
+                    <LoginFacebook />
                   </div>
                 </form>
                 {/* quen mat khau */}

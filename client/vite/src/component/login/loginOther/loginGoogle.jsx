@@ -1,33 +1,39 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { GoogleLogin } from "react-google-login";
-
-const clientId =
-  "416329735082-fitll6hgsqdubjfs7pqkqae1p9kdks41.apps.googleusercontent.com";
+import { FaGoogle } from "react-icons/fa";
+import { auth, providerGG } from "../../../firebase/firebaseConfig";
+import { signInWithPopup } from "firebase/auth";
+import { Cookies } from "react-cookie";
 
 const LoginGoogle = () => {
   const navigate = useNavigate();
+  const [loginGG, setLoginGG] = useState("LoginGG");
+  const cookies = new Cookies();
 
-  const onSuccess = (res) => {
-    console.log(res.profileObj);
-    navigate("/trang-chu", { state: res.profileObj });
-  };
-
-  const onFailure = (res) => {
-    console.log(res);
+  const responseGoogle = async () => {
+    try {
+      const res = await signInWithPopup(auth, providerGG);
+      cookies.set("gg_access_token", res.user.accessToken);
+      navigate("/trang-chu", {
+        state: { name: res.user.displayName, login: loginGG },
+      });
+    } catch (error) {
+      console.log("login facebook fail");
+    }
   };
 
   return (
-    <>
-      <GoogleLogin
-        clientId={clientId}
-        buttonText="Đăng nhập bằng google"
-        onSuccess={onSuccess}
-        onFailure={onFailure}
-        cookiePolicy={"single_host_origin"}
-        className="rounded-[30px!important] w-[280px] h-[50px] justify-center"
-      />
-    </>
+    <div
+      className="text-[14px] text-gray-300 
+  w-[280px] h-[50px] bg-gray-500 mt-[10px] shadow-2xl
+  rounded-[30px] flex justify-center items-center cursor-pointer"
+      onClick={responseGoogle}
+    >
+      <span>
+        <FaGoogle size="18px" />
+      </span>
+      <h3 className="pl-[8px]">Đăng nhập bằng Google</h3>
+    </div>
   );
 };
 

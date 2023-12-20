@@ -1,26 +1,27 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { GoogleLogout } from "react-google-login";
-
-const clientId =
-  "416329735082-fitll6hgsqdubjfs7pqkqae1p9kdks41.apps.googleusercontent.com";
+import { FaGoogle } from "react-icons/fa";
+import { Cookies } from "react-cookie";
 
 const LogOutGoogle = () => {
   const navigate = useNavigate();
+  const cookies = new Cookies();
 
-  const onSuccess = () => {
+  const logOut = () => {
     console.log("LOG OUT SUCCESS!");
+    cookies.remove("gg_access_token");
     navigate("/dang-nhap");
   };
 
   return (
-    <>
-      <GoogleLogout
-        clientId={clientId}
-        buttonText="Đăng xuất"
-        onLogoutSuccess={onSuccess}
-      ></GoogleLogout>
-    </>
+    <button className="bg-gray-600 flex p-2" onClick={logOut}>
+      <span>
+        <FaGoogle size="18px" className="text-white" />
+      </span>
+      <h3 className="text-gray-300 text-[15px] font-normal pl-[12px] pr-[10px]">
+        Đăng xuất
+      </h3>
+    </button>
   );
 };
 
