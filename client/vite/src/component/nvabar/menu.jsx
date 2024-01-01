@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BsCartCheck } from "react-icons/bs";
 import { FaChevronDown } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
@@ -6,10 +6,13 @@ import { IoLogOutOutline } from "react-icons/io5";
 import { FaHeart } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { MdNavigateNext } from "react-icons/md";
+import { ScrollMenu } from "../jsAnimation/animation";
+import { useNavigate } from "react-router-dom";
 
 const Menu = () => {
   const [openMenuU, setOpenMenuU] = useState(false);
   const [openCartMini, setOpenCartMini] = useState(false);
+  const nagivate = useNavigate();
 
   const openMenuUser = () => {
     setOpenMenuU((i) => !i);
@@ -19,11 +22,16 @@ const Menu = () => {
     setOpenCartMini((i) => !i);
   };
 
+  useEffect(() => {
+    //menu scroll
+    ScrollMenu();
+  }, []);
+
   return (
-    <div className="w-[100%] p-1 h-[100px] flex">
+    <div className="w-[100%] p-1 h-[100px] flex" id="menu">
       {/* logo */}
       <div className="cursor-pointer flex  items-center">
-        <span>
+        <span onClick={() => nagivate("/trang-chu")}>
           <img src="https://htmldemo.net/pustok/pustok/image/logo.png" />
         </span>
       </div>
@@ -64,42 +72,42 @@ const Menu = () => {
         <div
           className={`bg-white border-gray-200 border-[1px] absolute p-2
           before:content-[''] before:w-[20px] before:h-[20px]
-        before:bg-white before:absolute before:top-[-4%] before:rotate-45
+        before:bg-white before:absolute before:top-[-6.3%] before:rotate-45
+        before:border-gray-200 before:border-t-[2px] before:border-l-[2px] 
+        top-[13%]
         ${
           openMenuU
-            ? `visible opacity-1000 top-[13%]`
-            : "invisible opacity-0 top-[15%]"
+            ? `visible opacity-100  animate-menuMiniTop`
+            : "invisible opacity-0 animate-menuMiniDown duration-[0.5s]"
         }
-        before:left-[10%] shadow-md   duration-[0.6s] 
+        before:left-[10%] shadow-md  
        `}
+          id="menuMiniUser"
         >
           <ul className="p-3">
-            <a href="#">
-              <li className="flex hover:opacity-[0.4] duration-[0.5s]">
-                <span className="p-[2px] pr-[6px]">
-                  <FaUser size="14px" />
-                </span>
-                <span
-                  className="text-[13px] font-bold border-gray-200 border-b-[2px] pb-[10px]
+            <li className="flex hover:opacity-[0.4] duration-[0.5s] cursor-pointer">
+              <span className="p-[2px] pr-[6px]">
+                <FaUser size="14px" />
+              </span>
+              <span
+                className="text-[13px] font-bold border-gray-200 border-b-[2px] pb-[10px]
                 "
-                >
-                  Thông tin tài khoản
-                </span>
-              </li>
-            </a>
-            <a href="#">
-              <li className="mt-[20px] flex hover:opacity-[0.4] duration-[0.5s]">
-                <span className="p-[2px] pr-[6px]">
-                  <FaHeart size="14px" />
-                </span>
-                <span
-                  className="text-[13px] font-bold border-gray-200 border-b-[2px] pb-[10px]
+              >
+                Thông tin tài khoản
+              </span>
+            </li>
+            <li className="mt-[20px] flex hover:opacity-[0.4] duration-[0.5s] cursor-pointer">
+              <span className="p-[2px] pr-[6px]">
+                <FaHeart size="14px" />
+              </span>
+              <span
+                className="text-[13px] font-bold border-gray-200 border-b-[2px] pb-[10px]
                 "
-                >
-                  Danh sách yêu thích
-                </span>
-              </li>
-            </a>
+                onClick={() => nagivate("/danh-sach-yeu-thich")}
+              >
+                Danh sách yêu thích
+              </span>
+            </li>
           </ul>
           <button
             className="bg-green-600 p-[12px] text-white font-medium text-[13px] rounded-[3px]
@@ -139,11 +147,14 @@ const Menu = () => {
         <div
           className={`${
             openCartMini
-              ? " bg-white visible opacity-100 top-[14%]"
-              : "invisible opacity-0 top-[17%]"
-          } absolute right-[10%] shadow-md duration-[0.5s]
+              ? " bg-white visible opacity-100 animate-menuMiniTop"
+              : "invisible opacity-0 animate-menuMiniDown duration-[0.5s]"
+          } top-[14%] absolute right-[10%] shadow-md 
           after:content-[''] after:h-[20px] after:w-[20px] after:bg-white
-          after:absolute after:top-[-4%] after:right-[20%] after:rotate-45`}
+          after:absolute after:top-[-6%] after:right-[20%] after:rotate-45
+          after:border-gray-200 after:border-l-[2px] after:border-t-[2px]
+          border-gray-200 border-[2px] `}
+          id="cartMini"
         >
           {/* thong tin sach dat */}
           <div className="flex p-6 pb-[10px] border-b-[2px]  border-gray-200">
@@ -188,6 +199,7 @@ const Menu = () => {
             <span
               className="flex items-center justify-center font-bold pr-[10%]
             hover:text-green-600 duration-[0.5s]"
+              onClick={() => nagivate("/gio-hang")}
             >
               Xem giỏ hàng
               <span>
@@ -198,6 +210,7 @@ const Menu = () => {
               className="p-3 w-[140px] flex items-center justify-center
               bg-green-600 text-white text-[16px] font-medium rounded-[5px]
             hover:bg-black duration-[0.5s]"
+              onClick={() => nagivate("/thu-tuc-dat-hang")}
             >
               Đặt mua
               <span>

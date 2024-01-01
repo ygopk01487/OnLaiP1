@@ -8,6 +8,10 @@ import ForgetPass from "./component/login/forgetPass";
 import { useState } from "react";
 import Home from "./component/Home/Home";
 import Loading from "./component/loading/Loading";
+import ListLove from "./component/listLove/ListLove";
+import Carts from "./component/cart/Carts";
+import CheckOut from "./component/checkOut/CheckOut";
+import ProductDetail from "./component/productDetail/ProductDetail";
 
 function App() {
   return (
@@ -21,7 +25,10 @@ function App() {
         <Route path="/doi-mat-khau" element={<SingUpTwo />} />
         <Route path="/quen-mat-khau" element={<ForgetPass />} />
         <Route path="/trang-chu" element={<Home />} />
-        {/* <Route path="/load" element={<Loading />} /> */}
+        <Route path="/danh-sach-yeu-thich" element={<ListLove />} />
+        <Route path="/gio-hang" element={<Carts />} />
+        <Route path="/thu-tuc-dat-hang" element={<CheckOut />} />
+        <Route path="/san-pham-chi-tiet" element={<ProductDetail />} />
       </Routes>
     </BrowserRouter>
   );

@@ -3,10 +3,12 @@ import { MdNavigateNext } from "react-icons/md";
 import { FaCartPlus } from "react-icons/fa";
 import { FaHeartCirclePlus } from "react-icons/fa6";
 import { MdSkipNext } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 const HomeSection = () => {
   const [openShow, setOpenShow] = useState(false);
   const [openSort, setOpenSort] = useState(false);
+  const nagivate = useNavigate();
 
   const number = [1, 2, 3];
 
@@ -132,6 +134,7 @@ const HomeSection = () => {
             return (
               <>
                 <div
+                  onClick={() => nagivate("/san-pham-chi-tiet")}
                   key={ix}
                   className="w-[70%] shadow-md rounded-[3px] bg-white border-r-[2px] border-gray-200 p-3
           cursor-pointer relative group"
@@ -192,7 +195,7 @@ const HomeSection = () => {
         {/* phan trang */}
         <div
           className="bg-white border-[2px] border-gray-200 rounded-[2px] w-[100%]  
-        mt-[20px] flex items-center justify-center relative"
+        mt-[40px] flex items-center justify-center relative"
         >
           <span className="buton-pagin">
             <MdSkipNext size="20px" className="rotate-[180deg]" />

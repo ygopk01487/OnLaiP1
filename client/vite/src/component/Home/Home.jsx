@@ -8,6 +8,7 @@ import Menu from "../nvabar/menu";
 import HomeSection from "../HomeSection/HomeSection";
 import Slider from "../slider/Slider";
 import Footer from "../footer/Footer";
+import BackToTop from "../backToTop/BackToTop";
 
 const Home = () => {
   // const [name, setName] = useState("");
@@ -75,6 +76,7 @@ const Home = () => {
           <HomeSection />
           {/* cuoi giao dien */}
           <Footer />
+          <BackToTop />
         </div>
       </div>
       {/* <div>Hello {name}</div>
