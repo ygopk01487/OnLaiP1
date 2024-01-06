@@ -12,6 +12,9 @@ import ListLove from "./component/listLove/ListLove";
 import Carts from "./component/cart/Carts";
 import CheckOut from "./component/checkOut/CheckOut";
 import ProductDetail from "./component/productDetail/ProductDetail";
+import HomeDash from "./component/dashboard/home/homeDash";
+import ProductsDash from "./component/dashboard/productsDash/ProductsDash";
+import AccountDetail from "./component/accountDetail/AccountDetail";
 
 function App() {
   return (
@@ -29,6 +32,9 @@ function App() {
         <Route path="/gio-hang" element={<Carts />} />
         <Route path="/thu-tuc-dat-hang" element={<CheckOut />} />
         <Route path="/san-pham-chi-tiet" element={<ProductDetail />} />
+        <Route path="/trang-chu-admin" element={<HomeDash />} />
+        <Route path="/bang-san-pham" element={<ProductsDash />} />
+        <Route path="/tai-khoan-cua-toi" element={<AccountDetail />} />
       </Routes>
     </BrowserRouter>
   );

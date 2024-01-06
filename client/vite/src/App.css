@@ -134,4 +134,41 @@
     before:border-green-600 before:bottom-[0%] before:w-[9%] before:bottom-[0%] 
     text-green-600;
   }
+
+  /* dash board menu */
+  .icon-text-menuDash {
+    @apply flex cursor-pointer items-center justify-center
+    p-[11px] rounded-[8px] hover:bg-black duration-[0.5s];
+  }
+  .nvabar-icon {
+    @apply cursor-pointer flex p-[13px] rounded-[50%] hover:bg-gray-200 duration-[0.5s];
+  }
+
+  /* dash products */
+  .th-table-pro-dash {
+    @apply p-[10px] text-[16px] font-[500] border-[2px]
+    border-gray-200;
+  }
+  .tb-table-pro-dash {
+    @apply border-[2px] border-gray-200 p-[10px];
+  }
+  .pagin-pro-dash {
+    @apply p-[5px]
+    rounded-[3px] bg-white w-[20px] border-[2px] border-gray-200 cursor-pointer
+     flex items-center justify-center mr-[5px];
+  }
+
+  /* my account */
+  .menu-my-account {
+    @apply w-[100%] border-[2px] border-gray-200 cursor-pointer
+    flex items-center p-[13px] hover:bg-green-600 duration-[0.5s] hover:text-white
+rounded-[3px] text-[14px] font-[500];
+  }
+  .menu-my-account.active {
+    @apply bg-green-600 text-white;
+  }
+  .input-my-account {
+    @apply outline-none pl-[25px] p-[10px] w-[100%] rounded-[3px] border-[2px] border-gray-200
+    focus:border-green-600 mb-[10px];
+  }
 }
