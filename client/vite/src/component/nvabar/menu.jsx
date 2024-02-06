@@ -8,12 +8,36 @@ import { IoClose } from "react-icons/io5";
 import { MdNavigateNext } from "react-icons/md";
 import { ScrollMenu } from "../jsAnimation/animation";
 import { useNavigate } from "react-router-dom";
+import LogOutGoogle from "../login/logOutOther/logOutGoogle";
+import LogOutFacebook from "../login/logOutOther/logOutFacebook";
+import { Cookies } from "react-cookie";
+import { getByUser, logOUT, refreshTK } from "../../action/users";
+import { getByIdUserOther } from "../../action/usersOther";
 
 const Menu = () => {
   const [openMenuU, setOpenMenuU] = useState(false);
   const [openCartMini, setOpenCartMini] = useState(false);
+  const [search, setSearch] = useState(
+    "" || window.localStorage.getItem("search")
+  );
   const nagivate = useNavigate();
+  const [user, setUser] = useState(
+    JSON.parse(window.sessionStorage.getItem("user")) || ""
+  );
+  const check = window.sessionStorage.getItem("lg");
 
+  const cookie = new Cookies();
+  const navigate = useNavigate();
+
+  const [idUserOther, setIdUserOther] = useState("");
+
+  const images =
+    "https://banner2.cleanpng.com/20180811/oy/kisspng-computer-icons-clip-art-user-profile-image-member-svg-png-icon-free-download-288552-onli-5b6f6bc83d0489.8542259415340287442499.jpg";
+
+  const [name, setName] = useState("");
+  const [image, setImage] = useState("");
+
+  // ham
   const openMenuUser = () => {
     setOpenMenuU((i) => !i);
   };
@@ -22,9 +46,63 @@ const Menu = () => {
     setOpenCartMini((i) => !i);
   };
 
+  const fcSearch = () => {
+    window.localStorage.setItem("search", search);
+  };
+
+  //get userOne
+  const fcUser = async () => {
+    const user = await getByUser();
+    if (user) {
+      setName(user.name);
+      if (user.image === "") setImage(images);
+    }
+  };
+
+  //rf token
+  const fcRefreshToken = async () => {
+    const rfTK = cookie.get("refresh_token");
+
+    if (rfTK) {
+      const token = await refreshTK({ rfTK });
+      if (token) {
+        cookie.set("access_token", token);
+      }
+    }
+  };
+
+  //lgOut;
+  const logOuts = async () => {
+    const refreshTks = cookie.get("refresh_token");
+    await logOUT({ refreshTks });
+    cookie.remove("refresh_token");
+    cookie.remove("access_token");
+    window.localStorage.removeItem("lg");
+    navigate("/dang-nhap");
+  };
+
+  //user other
+  const getIdUserOther = async () => {
+    const localId = user.localId;
+    const data = await getByIdUserOther(localId);
+
+    if (data) setIdUserOther(data._id);
+  };
+
   useEffect(() => {
     //menu scroll
     ScrollMenu();
+
+    const token = cookie.get("access_token");
+
+    if (token) {
+      fcUser();
+      setInterval(() => {
+        fcRefreshToken();
+      }, 10000);
+    }
+
+    getIdUserOther();
   }, []);
 
   return (
@@ -42,11 +120,14 @@ const Menu = () => {
             className="p-3 rounded-[4px] outline-none w-[50%] border-t-[2px] border-b-[2px] 
             border-l-[2px] border-gray-300"
             placeholder="Tìm kiếm sách ở đây"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
           <button
             className=" border-green-600 border-t-[2px] border-b-[2px] border-r-[2px]
            bg-green-600 text-white p-3 rounded-[4px] text-[16px]
            hover:bg-green-700 duration-[0.5s] hover:border-green-700"
+            onClick={fcSearch}
           >
             Tìm kiếm
           </button>
@@ -60,13 +141,13 @@ const Menu = () => {
       >
         <span>
           <img
-            className="w-[45px] rounded-[50%]"
-            src="https://media.istockphoto.com/id/1298261537/vi/vec-to/ch%E1%BB%97-d%C3%A0nh-s%E1%BA%B5n-cho-bi%E1%BB%83u-t%C6%B0%E1%BB%A3ng-%C4%91%E1%BA%A7u-h%E1%BB%93-s%C6%A1-ng%C6%B0%E1%BB%9Di-%C4%91%C3%A0n-%C3%B4ng-tr%E1%BB%91ng.jpg?s=612x612&w=0&k=20&c=Rbi2tNjNA4z86gzSPBhGOefKI-XTKqlqGy-kiPoUvRA="
+            className="w-[45px] rounded-[50%] color-white"
+            src={user.photoUrl || image}
           />
         </span>
         <div className=" flex flex-col items-center ml-[5px]">
           <span className="text-[16px] font-bold">Xin chào</span>
-          <p className="text-[12px] text-medium">Yasuo pro</p>
+          <p className="text-[12px] text-medium">{user.displayName || name}</p>
         </div>
         {/* giao dien menu nguoi dung */}
         <div
@@ -103,21 +184,34 @@ const Menu = () => {
               <span
                 className="text-[13px] font-bold border-gray-200 border-b-[2px] pb-[10px]
                 "
-                onClick={() => nagivate("/danh-sach-yeu-thich")}
+                onClick={() =>
+                  nagivate("/danh-sach-yeu-thich", { state: { idUserOther } })
+                }
               >
                 Danh sách yêu thích
               </span>
             </li>
           </ul>
-          <button
-            className="bg-green-600 p-[12px] text-white font-medium text-[13px] rounded-[3px]
+          {check === "LoginFB" ? (
+            <div>
+              <LogOutFacebook />
+            </div>
+          ) : check === "LoginGG" ? (
+            <div>
+              <LogOutGoogle />
+            </div>
+          ) : (
+            <button
+              className="bg-green-600 p-[12px] text-white font-medium text-[13px] rounded-[3px]
           mt-[10px]  duration-[0.5s] hover:text-black w-[120px] flex items-center justify-center"
-          >
-            <span>Đăng xuất</span>
-            <span className="pl-[4px]">
-              <IoLogOutOutline size="14px" />
-            </span>
-          </button>
+              onClick={logOuts}
+            >
+              <span>Đăng xuất</span>
+              <span className="pl-[4px]">
+                <IoLogOutOutline size="14px" />
+              </span>
+            </button>
+          )}
         </div>
       </div>
       {/* gio hang */}

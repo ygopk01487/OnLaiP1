@@ -1,22 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaFacebookF } from "react-icons/fa";
 import { signInWithPopup } from "firebase/auth";
 import { auth, providerFB } from "../../../firebase/firebaseConfig";
 import { Cookies } from "react-cookie";
+import { addUserOthers } from "../../../action/usersOther";
 
 const LoginFacebook = () => {
   const navigate = useNavigate();
   const cookies = new Cookies();
-  const [loginFB, setLoginFB] = useState("LoginFB");
 
   const responseFacebook = async () => {
     try {
       const res = await signInWithPopup(auth, providerFB);
-      cookies.set("fb_access_token", res.user.accessToken);
-      navigate("/trang-chu", {
-        state: { name: res.user.displayName, login: loginFB },
-      });
+      if (res) {
+        cookies.set("fb_access_token", res.user.accessToken);
+        window.sessionStorage.setItem("lg", "LoginFB");
+        window.sessionStorage.setItem(
+          "user",
+          JSON.stringify(res.user.reloadUserInfo)
+        );
+        await addUserOthers(res.user.reloadUserInfo);
+        navigate("/trang-chu");
+      }
     } catch (error) {
       console.log("login facebook fail");
     }

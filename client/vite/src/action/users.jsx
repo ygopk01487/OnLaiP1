@@ -52,9 +52,9 @@ export const getByUser = async () => {
   }
 };
 
-export const refreshTK = async ({ rfToken }) => {
+export const refreshTK = async ({ rfTK }) => {
   try {
-    const datas = await refreshTokens({ refreshToken: rfToken });
+    const datas = await refreshTokens({ refreshToken: rfTK });
     return datas.data.accessToken;
   } catch (error) {
     console.log("refresh token fail!!!");

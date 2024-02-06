@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
 import { auth, providerGG } from "../../../firebase/firebaseConfig";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithRedirect } from "firebase/auth";
 import { Cookies } from "react-cookie";
+import { addUserOthers } from "../../../action/usersOther";
 
 const LoginGoogle = () => {
   const navigate = useNavigate();
@@ -13,12 +14,18 @@ const LoginGoogle = () => {
   const responseGoogle = async () => {
     try {
       const res = await signInWithPopup(auth, providerGG);
-      cookies.set("gg_access_token", res.user.accessToken);
-      navigate("/trang-chu", {
-        state: { name: res.user.displayName, login: loginGG },
-      });
+      if (res) {
+        cookies.set("gg_access_token", res.user.accessToken);
+        window.sessionStorage.setItem("lg", "LoginGG");
+        window.sessionStorage.setItem(
+          "user",
+          JSON.stringify(res.user.reloadUserInfo)
+        );
+        await addUserOthers(res.user.reloadUserInfo);
+        navigate("/trang-chu");
+      }
     } catch (error) {
-      console.log("login facebook fail");
+      console.log("login google fail");
     }
   };
 

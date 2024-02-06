@@ -9,19 +9,10 @@ import HomeSection from "../HomeSection/HomeSection";
 import Slider from "../slider/Slider";
 import Footer from "../footer/Footer";
 import BackToTop from "../backToTop/BackToTop";
+import Loading from "../loading/Loading";
 
 const Home = () => {
-  // const [name, setName] = useState("");
-
-  // const navigate = useNavigate();
-
-  // const location = useLocation();
-
-  // const checkLogin = location.state.login;
-
-  // const cookies = new Cookies();
-
-  // let check = false;
+  const [loading, setLoading] = useState(true);
 
   // const users = async () => {
   //   const user = await getByUser();
@@ -49,11 +40,6 @@ const Home = () => {
   // useEffect(() => {
   //   const token = cookies.get("access_token");
 
-  //   if (location.state) {
-  //     const user = location.state;
-  //     setName(user.name);
-  //   }
-
   //   if (token) {
   //     users();
   //     setInterval(() => {
@@ -63,22 +49,34 @@ const Home = () => {
   //     }, 10000);
   //   }
   // }, []);
+  const loadingPage = () => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 600);
+  };
+  useEffect(() => {
+    loadingPage();
+  }, []);
 
   return (
     <>
-      <div className="w-full ">
-        {/* dau` giao dien */}
-        <div className="w-[1200px] m-auto ">
-          {/* menu */}
-          <Menu />
-          <Slider />
-          {/* Than giao dien */}
-          <HomeSection />
-          {/* cuoi giao dien */}
-          <Footer />
-          <BackToTop />
+      {loading ? (
+        <Loading />
+      ) : (
+        <div className="w-full ">
+          {/* dau` giao dien */}
+          <div className="w-[1200px] m-auto ">
+            {/* menu */}
+            <Menu />
+            <Slider />
+            {/* Than giao dien */}
+            <HomeSection />
+            {/* cuoi giao dien */}
+            <Footer />
+            <BackToTop />
+          </div>
         </div>
-      </div>
+      )}
       {/* <div>Hello {name}</div>
       {checkLogin === "Login" && <button onClick={logOut}>dang xuat</button>}
       {checkLogin === "LoginGG" && (

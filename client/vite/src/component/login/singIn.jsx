@@ -53,6 +53,7 @@ const SingIn = () => {
       if (datas) {
         cookies.set("access_token", datas.accessToken);
         cookies.set("refresh_token", datas.refreshToken);
+        window.sessionStorage.setItem("lg", "Login");
         navigate("/trang-chu", { state: { login } });
         alert("Thanh cong");
       } else {

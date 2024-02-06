@@ -7,7 +7,7 @@ import { BiSolidErrorCircle } from "react-icons/bi";
 const Toast = ({ checkToast, mess }) => {
   return (
     <div
-      className={`bg-white  flex p-2 absolute right-[30px] top-[30px]
+      className={`bg-white flex z-[9999] p-2 absolute right-[30px] top-[60%]
     shadow-2xl rounded-[10px] border-l-[6px] ${
       checkToast === true ? "border-blue-600" : "border-red-600"
     } justify-center items-center

@@ -1,53 +1,318 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MdNavigateNext } from "react-icons/md";
 import { FaCartPlus } from "react-icons/fa";
 import { FaHeartCirclePlus } from "react-icons/fa6";
 import { MdSkipNext } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { getAllProducts } from "../../action/products";
+import Loading from "../loading/Loading";
+import LoadingProducts from "../loading/loadingProducts";
+import {
+  addListLove,
+  getByUserLove,
+  removeProLove,
+} from "../../action/listLove";
+import { Cookies } from "react-cookie";
+import { getByIdUserOther } from "../../action/usersOther";
+import Toast from "../toast/Toast";
+import { closeToast, showToast } from "../toast/ShowToast";
+import { getByUser, refreshTK } from "../../action/users";
 
 const HomeSection = () => {
   const [openShow, setOpenShow] = useState(false);
   const [openSort, setOpenSort] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [totalPage, setTotalPage] = useState(0);
+  const [number, setNumber] = useState(
+    "" || window.localStorage.getItem("numberPage")
+  );
+  const [name, setName] = useState("" || window.localStorage.getItem("search"));
+  const [sort, setSort] = useState({ sort: "", type: "" });
+  const [miniSort, setMiniSort] = useState([
+    { name: "Mặc định", type: "", value: "", param: "" },
+    { name: "Tên (A-Z)", type: "increase", value: "name", param: "TenA-Z" },
+    { name: "Tên (Z-A)", type: "reduce", value: "name", param: "TenZ-A" },
+    {
+      name: "Giá tăng dần",
+      type: "increase",
+      value: "price",
+      param: "GiaTangDan",
+    },
+    {
+      name: "Giá giảm dần",
+      type: "reduce",
+      value: "price",
+      param: "GiaGiamDan",
+    },
+    // {name:"Nhiều đánh giá nhất" , type:'reduce', value:'name'},
+    // {name:"Ít đánh giá nhất" , type:'reduce', value:'name'},
+  ]);
+  const [nameSort, setNameSort] = useState("Mặc định");
+
+  const [pageSize, setPageSize] = useState([3, 4, 5]);
+  const [pageS, setPageS] = useState(
+    "" || window.localStorage.getItem("pageSize")
+  );
+
   const nagivate = useNavigate();
+  let pages = [];
 
-  const number = [1, 2, 3];
+  const [search, setSearch] = useSearchParams({});
 
+  const [loading, setLoading] = useState(true);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  const [userOther, setUserOther] = useState(
+    "" || JSON.parse(window.sessionStorage.getItem("user"))
+  );
+
+  const [listLove, setListLove] = useState([]);
+
+  const [loadToast, setLoadToast] = useState(false);
+  const [checkToast, setCheckToast] = useState(false);
+  const [mess, setMess] = useState("");
+
+  const cookie = new Cookies();
+
+  const [loadBtn, setLoadBtn] = useState(false);
+
+  //ham
   const openS = () => setOpenShow((i) => !i);
   const openSor = () => setOpenSort((i) => !i);
+
+  const getProductAll = async (number, sort, name, pageSs) => {
+    setLoadingProducts(true);
+
+    const data = await getAllProducts(number, sort, name, pageSs);
+
+    setTotalPage(data.totalPage);
+    setProducts(data.products);
+
+    setLoadingProducts(false);
+  };
+
+  for (let i = 1; i <= totalPage; i++) {
+    pages.push(i);
+  }
+
+  const fcSetSort = (value, type, nameSort, param) => {
+    setSort({ sort: value, type: type });
+    setSearch({ sort: param });
+    window.localStorage.setItem("nameSort", nameSort);
+  };
+
+  const fcSetPageSize = (i) => {
+    setPageS(i);
+    setSearch({ pageSize: i });
+    window.localStorage.setItem("pageSize", i);
+  };
+
+  const fcSetNumber = (i) => {
+    setNumber(i);
+    setSearch({ page: i });
+    window.localStorage.setItem("numberPage", i);
+  };
+
+  const fcBtNextPage = () => fcSetNumber(number + 1);
+
+  const fcBtLastPage = () => fcSetNumber(number - 1);
+
+  const fcLastPage = () => {
+    let n = number + 3 > totalPage ? totalPage : number + 3;
+    fcSetNumber(n);
+  };
+
+  const fcFirstPage = () => {
+    let n = number - 3 < 1 ? 1 : number - 3;
+    fcSetNumber(n);
+  };
+
+  //add list love
+  const addListLoves = async (idProduct) => {
+    console.log("add");
+    setLoadBtn(true);
+    //get userOne
+    const token = cookie.get("access_token");
+    let user;
+    if (token) {
+      user = await getByUser();
+    }
+    //get id user
+    let datas;
+    if (!user) {
+      datas = await getByIdUserOther(userOther.localId);
+    }
+    let data;
+    if (datas) {
+      data = await addListLove(datas._id, idProduct, null);
+    } else {
+      data = await addListLove(null, idProduct, user._id);
+    }
+
+    if (data) {
+      getListUserLove();
+      setLoadToast(true);
+      setCheckToast(true);
+      setMess("Thêm vào danh sách yêu thích");
+    } else {
+      setLoadToast(true);
+      setCheckToast(false);
+      setMess("Thêm vào danh sách yêu thích");
+    }
+  };
+
+  //delete love
+  const deleteLove = async (idProduct) => {
+    console.log("delete");
+    setLoadBtn(true);
+    const token = cookie.get("access_token");
+    let user;
+    if (token) {
+      user = await getByUser();
+    }
+    let datas;
+    if (!user) {
+      //get id userOther
+      datas = await getByIdUserOther(userOther.localId, null);
+    }
+
+    //get by id list love
+    if (datas || user) {
+      let idUser;
+      if (!datas) {
+        idUser = await getByUserLove(null, user._id);
+      } else {
+        idUser = await getByUserLove(datas._id, null);
+      }
+
+      if (idUser) {
+        const data = await removeProLove(idUser._id, idProduct);
+        if (data) {
+          getListUserLove();
+          setLoadToast(true);
+          setCheckToast(true);
+          setMess("xóa sản phẩm yêu thích ");
+        } else {
+          setLoadToast(true);
+          setCheckToast(false);
+          alert("xóa sản phẩm  yeu thích ");
+        }
+      }
+    }
+  };
+
+  //get user list love
+  const getListUserLove = async () => {
+    //get userOne
+    const token = cookie.get("access_token");
+    let user;
+    if (token) {
+      user = await getByUser();
+    }
+    let datas;
+    let data;
+    if (!user) {
+      datas = await getByIdUserOther(userOther.localId);
+    }
+
+    if (datas) {
+      data = await getByUserLove(datas._id, null);
+    } else {
+      data = await getByUserLove(null, user._id);
+    }
+    if (data) {
+      setListLove(data.products);
+    }
+  };
+
+  //rf token
+  const fcRefreshToken = async () => {
+    const rfTK = cookie.get("refresh_token");
+
+    if (rfTK) {
+      const token = await refreshTK({ rfTK });
+      if (token) {
+        cookie.set("access_token", token);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (number === null || number === "") setNumber(1);
+
+    getListUserLove();
+
+    const token = cookie.get("access_token");
+
+    if (token) {
+      setInterval(() => {
+        fcRefreshToken();
+      }, 10000);
+    }
+  }, []);
+
+  useEffect(() => {
+    //set loading toast
+    if (loadToast === true) {
+      showToast();
+      setTimeout(() => {
+        setLoadToast(false);
+        setLoadBtn(false);
+        closeToast();
+      }, 2000);
+    }
+  }, [addListLoves, deleteLove]);
+
+  useEffect(() => {
+    if (name) {
+      setSearch({ name });
+      setNumber(1);
+      window.localStorage.setItem("numberPage", 1);
+    }
+
+    getProductAll(number, sort, name, pageS);
+
+    let nameSorts = window.localStorage.getItem("nameSort");
+
+    if (nameSorts) setNameSort(nameSorts);
+  }, [number, sort, name, pageS, totalPage]);
+
   return (
-    <div className="w-[100%] mt-[20px]">
-      {/* tieu de */}
-      <div className="flex text-[14px]">
-        <span className="flex items-center p-1 cursor-pointer duration-[0.5s] hover:text-green-600">
-          Trang chủ <MdNavigateNext size="13px" className="ml-[5px]" />
-        </span>
-        <span className="p-1">Danh sách sản phẩm</span>
-      </div>
-      {/* than giao dien */}
+    <>
+      <Toast checkToast={checkToast} mess={mess} />
       <div className="w-[100%] mt-[20px]">
-        {/* thanh cong cu */}
-        <div
-          className="w-[100%] bg-white border-gray-200 border-[2px] rounded-[2px] p-3
-          flex
+        {/* tieu de */}
+        <div className="flex text-[14px]">
+          <span className="flex items-center p-1 cursor-pointer duration-[0.5s] hover:text-green-600">
+            Trang chủ <MdNavigateNext size="13px" className="ml-[5px]" />
+          </span>
+          <span className="p-1">Danh sách sản phẩm</span>
+        </div>
+        {/* than giao dien */}
+        <div className="w-[100%] mt-[20px] relative">
+          {/* thanh cong cu */}
+          <div
+            className="w-[100%] bg-white border-gray-200 border-[2px] rounded-[2px] p-3 
+          flex mb-[5px]
         "
-        >
-          {/* hien thi danh sach bao nhieu */}
-          <div className="flex items-center ml-[70%] mr-[5%] relative">
-            <span className="text-[14px] pr-[10px]">Hiển thị:</span>
-            <span
-              className="flex items-center cursor-pointer text-[15px] font-[450]"
-              onClick={openS}
-            >
-              3{" "}
-              <MdNavigateNext
-                size="14px"
-                className={`${openShow ? "rotate-[-90deg]" : "rotate-90"} 
+          >
+            {/* hien thi danh sach bao nhieu */}
+            <div className="flex items-center ml-[70%] mr-[5%] relative">
+              <span className="text-[14px] pr-[10px]">Hiển thị:</span>
+              <span
+                className="flex items-center cursor-pointer text-[15px] font-[450]"
+                onClick={openS}
+              >
+                {pageS || 3}
+                <MdNavigateNext
+                  size="14px"
+                  className={`${openShow ? "rotate-[-90deg]" : "rotate-90"} 
               duration-[0.5s] ml-[10px]`}
-              />
-            </span>
-            {/* danh sach hien mini */}
-            <div
-              className={`absolute bg-white shadow-md z-[10]
+                />
+              </span>
+              {/* danh sach hien mini */}
+              <div
+                className={`absolute bg-white shadow-md z-[10]
               ${
                 openShow
                   ? "top-[110%] visible opacity-100"
@@ -55,174 +320,218 @@ const HomeSection = () => {
               } p-2 w-[50px] 
               rounded-[3px] top-[160%] right-[5%]
               duration-[0.5s] `}
-            >
-              <ul className="p-1 flex flex-col items-center ">
-                <li
-                  className="cursor-pointer w-[100%] text-[14px] h-[30px]
+              >
+                <ul className="p-1 flex flex-col items-center ">
+                  {pageSize.map((i, idx) => {
+                    return (
+                      <li
+                        key={idx}
+                        className="cursor-pointer w-[100%] text-[14px] h-[30px]
                 flex items-center justify-center rounded-[2px] hover:bg-gray-200 duration-[0.5s]"
-                >
-                  3
-                </li>
-                <li
-                  className="cursor-pointer w-[100%] text-[14px] h-[30px]
-                flex items-center justify-center rounded-[2px] hover:bg-gray-200 duration-[0.5s]"
-                >
-                  4
-                </li>
-                <li
-                  className="cursor-pointer w-[100%] text-[14px] h-[30px]
-                flex items-center justify-center rounded-[2px] hover:bg-gray-200 duration-[0.5s]"
-                >
-                  5
-                </li>
-              </ul>
+                        onClick={() => fcSetPageSize(i)}
+                      >
+                        {i}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </div>
-          </div>
-          {/* sap xep theo.... */}
-          <div className="flex items-center relavite">
-            <span className="text-[14px] pr-[10px]">Sắp xếp:</span>
-            <span
-              className="flex items-center cursor-pointer text-[15px] font-[450]"
-              onClick={openSor}
-            >
-              Mặc định
-              <MdNavigateNext
-                size="14px"
-                className={`${openSort ? "rotate-[-90deg]" : "rotate-90"}
+            {/* sap xep theo.... */}
+            <div className="flex items-center relative">
+              <span className="text-[14px] pr-[10px]">Sắp xếp:</span>
+              <span
+                className="flex items-center cursor-pointer text-[15px] font-[450]"
+                onClick={openSor}
+              >
+                {nameSort}
+                <MdNavigateNext
+                  size="14px"
+                  className={`${openSort ? "rotate-[-90deg]" : "rotate-90"}
               duration-[0.5s]  ml-[10px]`}
-              />
-            </span>
-            {/* sap xep mini */}
-            <div
-              className={`absolute bg-white border-[2px] z-[10] rounded-[2px] border-gray-200
+                />
+              </span>
+              {/* sap xep mini */}
+              <div
+                className={`absolute bg-white border-[2px] z-[10] rounded-[2px] border-gray-200
             p-2 shadow-md ${
               openSort
-                ? "visible opacity-100 top-[77%]"
-                : "invisible opacity-0 top-[74%]"
+                ? "visible opacity-100 top-[150%]"
+                : "invisible opacity-0 top-[155%]"
             } duration-[0.5s]`}
-            >
-              <ul className="flex flex-col items-center">
-                <li className="p-2 cursor-pointer text-[14px] hover:bg-gray-200 duration-[0.5s]">
-                  Mặc định
-                </li>
-                <li className="p-2 cursor-pointer text-[14px] hover:bg-gray-200 duration-[0.5s]">
-                  Tên (A-Z)
-                </li>
-                <li className="p-2 cursor-pointer text-[14px] hover:bg-gray-200 duration-[0.5s]">
-                  Tên (Z-A)
-                </li>
-                <li className="p-2 cursor-pointer text-[14px] hover:bg-gray-200 duration-[0.5s]">
-                  Giá giảm dần
-                </li>
-                <li className="p-2 cursor-pointer text-[14px] hover:bg-gray-200 duration-[0.5s]">
-                  Giá tăng dần
-                </li>
-                <li className="p-2 cursor-pointer text-[14px] hover:bg-gray-200 duration-[0.5s]">
-                  Nhiều đánh giá nhất
-                </li>
-                <li className="p-2 cursor-pointer text-[14px] hover:bg-gray-200 duration-[0.5s]">
-                  ít đánh giá nhất
-                </li>
-              </ul>
+              >
+                <ul className="flex flex-col items-center">
+                  {miniSort.map((i, idx) => {
+                    return (
+                      <li
+                        key={idx}
+                        className="p-2 cursor-pointer text-[14px] hover:bg-gray-200 duration-[0.5s]"
+                        onClick={() =>
+                          fcSetSort(i.value, i.type, i.name, i.param)
+                        }
+                      >
+                        {i.name}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-        {/* danh sach san pham */}
-        <div className="w-[100%] grid grid-cols-3 gap-[10px] p-2 mt-[20px] z-[2]">
-          {/* san pham 1 */}
-          {number.map((i, ix) => {
-            return (
-              <>
-                <div
-                  onClick={() => nagivate("/san-pham-chi-tiet")}
-                  key={ix}
-                  className="w-[70%] shadow-md rounded-[3px] bg-white border-r-[2px] border-gray-200 p-3
+          {/* danh sach san pham */}
+          {loadingProducts ? (
+            <LoadingProducts top="40%" />
+          ) : (
+            <div className="w-[100%] grid grid-cols-3 gap-[20px] p-2 mt-[20px] z-[2]">
+              {/* san pham 1 */}
+              {products.map((product, i) => {
+                return (
+                  <>
+                    <div
+                      key={product._id}
+                      className="w-[70%] shadow-md rounded-[3px] bg-white border-r-[2px] border-gray-200 p-3
           cursor-pointer relative group"
-                >
-                  <span
-                    className="flex justify-center text-[13px] font-[600] cursor-default
-            pb-[6px]"
-                  >
-                    Động vật
-                  </span>
-                  <h2 className="text-center font-[700] pb-[6px]">
-                    Here Is A Quick Cure For Book
-                  </h2>
-                  <span>
-                    <img
-                      src="https://htmldemo.net/pustok/pustok/image/products/product-2.jpg"
-                      className="w-[100%]"
-                    />
-                  </span>
-                  <div className="flex justify-center items-center">
-                    <span className="text-[17px] text-green-600 font-[500] pr-[6px]">
-                      15.000 đ
-                    </span>
-                    <span className="text-gray-400 text-[14px] pr-[6px]">
-                      10.000 đ
-                    </span>
-                    <span
-                      className="p-1 bg-red-600 text-white text-[15px] font-[650]
-              rounded-[4px]"
                     >
-                      20%
-                    </span>
-                  </div>
-                  {/* menu mini san pham*/}
-                  <div
-                    className="absolute  bg-white shadow-md w-[30%] p-1 top-[53%] left-[35%]
+                      <span
+                        className="flex justify-center text-[13px] font-[600] cursor-default
+            pb-[6px]"
+                      >
+                        {product.category}
+                      </span>
+                      <h2 className="text-center font-[700] pb-[6px]">
+                        {product.name}
+                      </h2>
+                      <span>
+                        <img
+                          src={product.image}
+                          className="w-[100%]"
+                          onClick={() =>
+                            nagivate(
+                              `/san-pham-chi-tiet?name=${product.name}`,
+                              {
+                                state: { id: product._id },
+                              }
+                            )
+                          }
+                        />
+                      </span>
+                      <div className="flex justify-center items-center">
+                        <span className="text-[17px] text-green-600 font-[500] pr-[6px]">
+                          {(product.price * (100 - product.discount)) / 100}đ
+                        </span>
+                        <span className="text-gray-400 text-[14px] pr-[6px]">
+                          {product.price}đ
+                        </span>
+                        <span
+                          className="p-1 bg-red-600 text-white text-[15px] font-[650]
+              rounded-[4px]"
+                        >
+                          {product.discount}%
+                        </span>
+                      </div>
+                      {/* menu mini san pham*/}
+                      <div
+                        className="absolute  bg-white shadow-md w-[30%] p-1 top-[53%] left-[35%]
             rounded-[3px] group-hover:opacity-100 duration-[0.5s] group-hover:top-[50%] 
-            opacity-0 invisible group-hover:visible"
-                  >
-                    <ul className="grid grid-cols-2 p-1 w-[100%] items-center">
-                      <li className="border-r-[2px] border-gray-200 p-2">
-                        <span className="cursor-pointer hover:text-green-600 duration-[0.5s]">
-                          <FaCartPlus size="14px" />
-                        </span>
-                      </li>
-                      <li className="flex justify-center">
-                        <span className="cursor-pointer hover:text-green-600 duration-[0.5s]">
-                          <FaHeartCirclePlus size="14px" />
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </>
-            );
-          })}
-        </div>
-        {/* phan trang */}
-        <div
-          className="bg-white border-[2px] border-gray-200 rounded-[2px] w-[100%]  
+            opacity-0 invisible group-hover:visible "
+                      >
+                        <ul className="grid grid-cols-2 p-1 w-[100%] items-center">
+                          <li className="border-r-[2px] border-gray-200 p-2">
+                            <span className="cursor-pointer hover:text-green-600 duration-[0.5s]">
+                              <FaCartPlus size="14px" />
+                            </span>
+                          </li>
+                          <li className="flex justify-center">
+                            <span
+                              className={` ${
+                                listLove.some((i) => i._id === product._id)
+                                  ? "text-green-500"
+                                  : ""
+                              }
+                             ${
+                               loadBtn
+                                 ? "cursor-not-allowed "
+                                 : "cursor-pointer"
+                             }  hover:text-green-600 duration-[0.5s]`}
+                              onClick={() =>
+                                listLove.some((i) => i._id === product._id)
+                                  ? deleteLove(product._id)
+                                  : addListLoves(product._id)
+                              }
+                            >
+                              <FaHeartCirclePlus size="14px" />
+                            </span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </>
+                );
+              })}
+            </div>
+          )}
+
+          {/* phan trang */}
+          <div
+            className="bg-white border-[2px] border-gray-200 rounded-[2px] w-[100%]  
         mt-[40px] flex items-center justify-center relative"
-        >
-          <span className="buton-pagin">
-            <MdSkipNext size="20px" className="rotate-[180deg]" />
-          </span>
-          <span className="buton-pagin">
-            <MdNavigateNext size="20px" className="rotate-[180deg]" />
-          </span>
-          {number.map((i, idx) => {
-            return (
-              <span
-                key={idx}
-                className={`text-[18px] buton-pagin font-[500]
-                ${i === 1 ? "button-active " : ""}`}
-              >
-                {i}
-              </span>
-            );
-          })}
-          <span className="buton-pagin">
-            <MdNavigateNext size="20px" />
-          </span>
-          <span className="buton-pagin">
-            <MdSkipNext size="20px" />
-          </span>
+          >
+            <span
+              className={`buton-pagin ${
+                parseInt(number) === 1
+                  ? "opacity-0 invisible"
+                  : "opcity-100 visible"
+              }`}
+              onClick={fcFirstPage}
+            >
+              <MdSkipNext size="20px" className="rotate-[180deg]" />
+            </span>
+            <span
+              className={`buton-pagin ${
+                parseInt(number) === 1
+                  ? "opacity-0 invisible"
+                  : "opcity-100 visible"
+              }`}
+              onClick={fcBtLastPage}
+            >
+              <MdNavigateNext size="20px" className="rotate-[180deg]" />
+            </span>
+            {pages.map((i, idx) => {
+              return (
+                <span
+                  key={idx}
+                  className={`text-[18px] buton-pagin font-[500]
+                ${i === parseInt(number) ? "button-active " : ""}`}
+                  onClick={() => fcSetNumber(i)}
+                >
+                  {i}
+                </span>
+              );
+            })}
+            <span
+              className={`buton-pagin ${
+                parseInt(number) === totalPage
+                  ? "opacity-0 invisible"
+                  : "opcity-100 visible"
+              }`}
+              onClick={fcBtNextPage}
+            >
+              <MdNavigateNext size="20px" />
+            </span>
+            <span
+              className={`buton-pagin ${
+                parseInt(number) === totalPage
+                  ? "opacity-0 invisible"
+                  : "opcity-100 visible"
+              }`}
+              onClick={fcLastPage}
+            >
+              <MdSkipNext size="20px" />
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

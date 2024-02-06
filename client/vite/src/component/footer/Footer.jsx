@@ -8,7 +8,7 @@ const Footer = () => {
   return (
     <>
       <div
-        className="w-[100%] mt-[40px] pt-[20px] border-t-[2px] border-gray-200
+        className="w-[100%] mt-[6%] pt-[20px] border-t-[2px] border-gray-200
      grid grid-cols-4"
       >
         {/* logo */}

@@ -8,16 +8,30 @@ const LogOutFacebook = () => {
   const cookies = new Cookies();
 
   const logOut = () => {
-    console.log("logout success");
-    cookies.remove("fb_access_token");
-    navigate("/dang-nhap");
+    try {
+      console.log("LOG OUT SUCCESS!");
+      cookies.remove("fb_access_token");
+      window.sessionStorage.removeItem("lg");
+      window.sessionStorage.removeItem("user");
+      window.localStorage.removeItem("nameSort");
+      window.localStorage.removeItem("numberPage");
+      window.localStorage.removeItem("search");
+      window.localStorage.removeItem("pageSize");
+      navigate("/dang-nhap");
+    } catch (error) {
+      console.log("logout FB fail");
+    }
   };
   return (
-    <button className="bg-blue-600 flex p-2" onClick={logOut}>
+    <button
+      className="bg-blue-600 flex p-2 rounded-[3px] hover:opacity-[0.6]
+    duration-[0.5s] "
+      onClick={logOut}
+    >
       <span>
-        <FaFacebookF size="18px" className="text-blue" />
+        <FaFacebookF size="18px" className="text-blue-800" />
       </span>
-      <h3 className="text-gray-300 text-[15px] font-normal pl-[12px] pr-[10px]">
+      <h3 className="text-[15px] text-white font-[450] pl-[12px] pr-[10px]">
         Đăng xuất
       </h3>
     </button>

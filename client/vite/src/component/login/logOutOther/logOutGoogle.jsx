@@ -8,17 +8,32 @@ const LogOutGoogle = () => {
   const cookies = new Cookies();
 
   const logOut = () => {
-    console.log("LOG OUT SUCCESS!");
-    cookies.remove("gg_access_token");
-    navigate("/dang-nhap");
+    try {
+      console.log("LOG OUT SUCCESS!");
+      cookies.remove("gg_access_token");
+      window.sessionStorage.removeItem("lg");
+      window.sessionStorage.removeItem("user");
+      window.localStorage.removeItem("nameSort");
+      window.localStorage.removeItem("numberPage");
+      window.localStorage.removeItem("search");
+      window.localStorage.removeItem("pageSize");
+      navigate("/dang-nhap");
+    } catch (error) {
+      console.log("logOut GG fails");
+    }
   };
 
   return (
-    <button className="bg-gray-600 flex p-2" onClick={logOut}>
+    <button
+      className="bg-gray-600 flex p-2 
+    rounded-[3px] hover:opacity-[0.6]
+    duration-[0.5s] "
+      onClick={logOut}
+    >
       <span>
         <FaGoogle size="18px" className="text-white" />
       </span>
-      <h3 className="text-gray-300 text-[15px] font-normal pl-[12px] pr-[10px]">
+      <h3 className="text-[15px] text-white font-[450] pl-[12px] pr-[10px]">
         Đăng xuất
       </h3>
     </button>

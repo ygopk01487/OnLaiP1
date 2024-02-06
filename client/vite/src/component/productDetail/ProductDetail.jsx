@@ -9,17 +9,46 @@ import { FaHeartCirclePlus } from "react-icons/fa6";
 import { FaCartPlus } from "react-icons/fa";
 import { backToReview } from "../jsAnimation/animation";
 import BackToTop from "../backToTop/BackToTop";
+import { useLocation } from "react-router-dom";
+import { getById } from "../../action/products";
 
 const ProductDetail = () => {
   const stars = [1, 2, 3, 4, 5];
   const [ac, setAc] = useState(true);
+  const [product, setProduct] = useState({
+    name: "",
+    image: "",
+    price: "",
+    discount: "",
+    category: "",
+    describe: "",
+  });
   const number = [1, 2, 3, 4];
+  const location = useLocation();
+  const id = location.state.id;
 
   const activeF = () => {
     setAc(false);
     backToReview();
   };
   const activeT = () => setAc(true);
+
+  //ham
+  const getProductById = async () => {
+    const data = await getById(id);
+    setProduct({
+      ...product,
+      name: data.name,
+      price: data.price,
+      discount: data.discount,
+      image: data.image,
+      describe: data.describe,
+    });
+  };
+
+  useEffect(() => {
+    getProductById();
+  }, []);
 
   return (
     <div className="w-[100%]">
@@ -46,21 +75,18 @@ const ProductDetail = () => {
             <div className="w-[100%] flex justify-between">
               {/* hinh anh */}
               <div className="w-[70%]">
-                <img
-                  src="https://htmldemo.net/pustok/pustok/image/products/product-details-1.jpg"
-                  className="w-[450px]"
-                />
+                <img src={product.image} className="w-[450px]" />
               </div>
               {/* tohng tin */}
               <div className="w-[100%]">
                 <div className="text-[14px] font-[400] pb-[10px] flex">
                   <span className="pr-[5px]">Thể loại:</span>
                   <span className=" hover:text-green-600 duration-[0.5s] cursor-pointer">
-                    lịch sử
+                    {product.category}
                   </span>
                 </div>
                 <h1 className="text-[18px] font-[550] pb-[10px]">
-                  Beats EP Wired On-Ear Headphone-Black
+                  {product.name}
                 </h1>
                 <div>
                   <div className="flex">
@@ -97,9 +123,9 @@ const ProductDetail = () => {
                   </div>
                   <div className="flex items-center pt-[10px]">
                     <span className="text-[19px] font-[500] text-green-600 pr-[8px]">
-                      10.000 đ
+                      {(product.price * (100 - product.discount)) / 100} đ
                     </span>
-                    <del className="text-gray-400">20.000 đ</del>
+                    <del className="text-gray-400">{product.price} đ</del>
                   </div>
                   <div className="flex mt-[10px] pb-[10px]">
                     {stars.map((i, idx) => {
@@ -178,18 +204,7 @@ const ProductDetail = () => {
             </div>
             {/* mo ta them */}
             <div className={`${ac ? "block" : "hidden"} p-[40px]`}>
-              <p className="text-[16px] font-[400]">
-                Thời trang đã tạo ra các bộ sưu tập được thiết kế đẹp mắt kể từ
-                năm 2010. Thương hiệu này cung cấp các thiết kế nữ tính mang đến
-                những chiếc váy tách biệt và nổi bật đầy phong cách, từ đó đã
-                phát triển thành một bộ sưu tập quần áo may sẵn đầy đủ, trong đó
-                mỗi món đồ đều là một phần quan trọng trong tủ quần áo của phụ
-                nữ. Kết quả? Vẻ ngoài mát mẻ, dễ dàng, sang trọng với sự thanh
-                lịch trẻ trung và phong cách đặc trưng không thể nhầm lẫn. Tất
-                cả những món đồ đẹp đẽ đều được sản xuất tại Ý và được sản xuất
-                với sự chú ý lớn nhất. Giờ đây, Thời trang mở rộng sang nhiều
-                loại phụ kiện bao gồm giày, mũ, thắt lưng và nhiều thứ khác!
-              </p>
+              <p className="text-[16px] font-[400]">{product.describe}</p>
             </div>
             {/* binh luan */}
             <div className={`${!ac ? "block" : "hidden"} w-[100%]`}>
