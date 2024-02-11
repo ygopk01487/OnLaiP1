@@ -84,7 +84,13 @@ const deleteListLove = async (req, res) => {
   try {
     const deleted = await ListLove.findByIdAndDelete(id);
 
-    res.status(200).json({ success: true, message: "delete love true" });
+    res
+      .status(200)
+      .json({
+        success: true,
+        deleteLove: deleted,
+        message: "delete love true",
+      });
   } catch (error) {
     return res
       .status(404)
