@@ -17,6 +17,7 @@ import { getByIdUserOther } from "../../action/usersOther";
 import Toast from "../toast/Toast";
 import { closeToast, showToast } from "../toast/ShowToast";
 import { getByUser, refreshTK } from "../../action/users";
+import { addListCart, getListCartByUser } from "../../action/listCart";
 
 const HomeSection = () => {
   const [openShow, setOpenShow] = useState(false);
@@ -129,73 +130,76 @@ const HomeSection = () => {
 
   //add list love
   const addListLoves = async (idProduct) => {
-    console.log("add");
-    setLoadBtn(true);
-    //get userOne
-    const token = cookie.get("access_token");
-    let user;
-    if (token) {
-      user = await getByUser();
-    }
-    //get id user
-    let datas;
-    if (!user) {
-      datas = await getByIdUserOther(userOther.localId);
-    }
-    let data;
-    if (datas) {
-      data = await addListLove(datas._id, idProduct, null);
-    } else {
-      data = await addListLove(null, idProduct, user._id);
-    }
+    if (loadBtn === false) {
+      console.log("add");
+      //get userOne
+      const token = cookie.get("access_token");
+      let user;
+      if (token) {
+        user = await getByUser();
+      }
+      //get id user
+      let datas;
+      if (!user) {
+        datas = await getByIdUserOther(userOther.localId);
+      }
+      let data;
+      if (datas) {
+        data = await addListLove(datas._id, idProduct, null);
+      } else {
+        data = await addListLove(null, idProduct, user._id);
+      }
 
-    if (data) {
-      getListUserLove();
-      setLoadToast(true);
-      setCheckToast(true);
-      setMess("Thêm vào danh sách yêu thích");
-    } else {
-      setLoadToast(true);
-      setCheckToast(false);
-      setMess("Thêm vào danh sách yêu thích");
+      if (data) {
+        getListUserLove();
+        setLoadToast(true);
+        setCheckToast(true);
+        setMess("Thêm vào danh sách yêu thích");
+      } else {
+        setLoadToast(true);
+        setCheckToast(false);
+        setMess("Thêm vào danh sách yêu thích");
+      }
     }
   };
 
   //delete love
   const deleteLove = async (idProduct) => {
-    console.log("delete");
     setLoadBtn(true);
-    const token = cookie.get("access_token");
-    let user;
-    if (token) {
-      user = await getByUser();
-    }
-    let datas;
-    if (!user) {
-      //get id userOther
-      datas = await getByIdUserOther(userOther.localId, null);
-    }
-
-    //get by id list love
-    if (datas || user) {
-      let idUser;
-      if (!datas) {
-        idUser = await getByUserLove(null, user._id);
-      } else {
-        idUser = await getByUserLove(datas._id, null);
+    if (loadBtn === false) {
+      console.log("delete");
+      const token = cookie.get("access_token");
+      let user;
+      if (token) {
+        user = await getByUser();
+      }
+      let datas;
+      if (!user) {
+        //get id userOther
+        datas = await getByIdUserOther(userOther.localId, null);
       }
 
-      if (idUser) {
-        const data = await removeProLove(idUser._id, idProduct);
-        if (data) {
-          getListUserLove();
-          setLoadToast(true);
-          setCheckToast(true);
-          setMess("xóa sản phẩm yêu thích ");
+      //get by id list love
+      if (datas || user) {
+        let idUser;
+        if (!datas) {
+          idUser = await getByUserLove(null, user._id);
         } else {
-          setLoadToast(true);
-          setCheckToast(false);
-          alert("xóa sản phẩm  yeu thích ");
+          idUser = await getByUserLove(datas._id, null);
+        }
+
+        if (idUser) {
+          const data = await removeProLove(idUser._id, idProduct);
+          if (data) {
+            getListUserLove();
+            setLoadToast(true);
+            setCheckToast(true);
+            setMess("xóa sản phẩm yêu thích ");
+          } else {
+            setLoadToast(true);
+            setCheckToast(false);
+            alert("xóa sản phẩm  yeu thích ");
+          }
         }
       }
     }
@@ -224,6 +228,50 @@ const HomeSection = () => {
       setListLove(data.products);
     }
   };
+
+  //get cart by user
+  //add cart
+  const addListCarts = async (product, total, quanitty, totalPrice) => {
+    const token = cookie.get("access_token");
+    let user;
+    let datas;
+    let data;
+
+    if (token) {
+      user = await getByUser();
+      if (user) {
+        data = await addListCart(
+          user._id,
+          null,
+          product,
+          total,
+          quanitty,
+          totalPrice
+        );
+      }
+    } else {
+      datas = await getByIdUserOther(userOther.localId);
+      if (datas) {
+        data = await addListCart(
+          null,
+          datas._id,
+          product,
+          total,
+          quanitty,
+          totalPrice
+        );
+      }
+    }
+
+    if (data) {
+      window.localStorage.setItem("addCart", "true");
+      alert("them vao gio hang thanh cong");
+    } else {
+      alert("them vao gio hang that bai");
+    }
+  };
+  //edit cart
+  //delete list pro cart
 
   //rf token
   const fcRefreshToken = async () => {
@@ -257,10 +305,12 @@ const HomeSection = () => {
       showToast();
       setTimeout(() => {
         setLoadToast(false);
-        setLoadBtn(false);
         closeToast();
+        setLoadBtn(false);
       }, 2000);
     }
+
+    //load btn
   }, [addListLoves, deleteLove]);
 
   useEffect(() => {
@@ -437,7 +487,20 @@ const HomeSection = () => {
                       >
                         <ul className="grid grid-cols-2 p-1 w-[100%] items-center">
                           <li className="border-r-[2px] border-gray-200 p-2">
-                            <span className="cursor-pointer hover:text-green-600 duration-[0.5s]">
+                            <span
+                              className="cursor-pointer hover:text-green-600 duration-[0.5s]"
+                              onClick={() =>
+                                addListCarts(
+                                  product._id,
+                                  (product.price * (100 - product.discount)) /
+                                    100,
+                                  1,
+                                  ((product.price * (100 - product.discount)) /
+                                    100) *
+                                    1
+                                )
+                              }
+                            >
                               <FaCartPlus size="14px" />
                             </span>
                           </li>
@@ -449,8 +512,8 @@ const HomeSection = () => {
                                   : ""
                               }
                              ${
-                               loadBtn
-                                 ? "cursor-not-allowed "
+                               loadBtn === true
+                                 ? "cursor-not-allowed"
                                  : "cursor-pointer"
                              }  hover:text-green-600 duration-[0.5s]`}
                               onClick={() =>

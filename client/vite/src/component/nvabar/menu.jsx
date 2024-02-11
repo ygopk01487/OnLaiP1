@@ -13,6 +13,7 @@ import LogOutFacebook from "../login/logOutOther/logOutFacebook";
 import { Cookies } from "react-cookie";
 import { getByUser, logOUT, refreshTK } from "../../action/users";
 import { getByIdUserOther } from "../../action/usersOther";
+import { deleteListProCart, getListCartByUser } from "../../action/listCart";
 
 const Menu = () => {
   const [openMenuU, setOpenMenuU] = useState(false);
@@ -37,6 +38,17 @@ const Menu = () => {
   const [name, setName] = useState("");
   const [image, setImage] = useState("");
 
+  const [dataCarts, setDataCarts] = useState([]);
+  const [idProCar, setIdProCart] = useState("");
+  const [totalCart, setTotalCart] = useState(0);
+
+  const [idUser, setIdUser] = useState("");
+  const [lengthCart, setLengthCart] = useState(0);
+
+  const [callCart, setCallCart] = useState(
+    "" || window.localStorage.getItem("addCart")
+  );
+
   // ham
   const openMenuUser = () => {
     setOpenMenuU((i) => !i);
@@ -55,6 +67,7 @@ const Menu = () => {
     const user = await getByUser();
     if (user) {
       setName(user.name);
+      setIdUser(user._id);
       if (user.image === "") setImage(images);
     }
   };
@@ -86,7 +99,38 @@ const Menu = () => {
     const localId = user.localId;
     const data = await getByIdUserOther(localId);
 
-    if (data) setIdUserOther(data._id);
+    if (data) {
+      setIdUserOther(data._id);
+    }
+  };
+
+  //get cart by user
+  const getByUserCarts = async () => {
+    const token = cookie.get("access_token");
+    let data;
+    if (token) {
+      data = await getListCartByUser(null, idUser);
+    } else {
+      data = await getListCartByUser(idUserOther, null);
+    }
+
+    if (data) {
+      setDataCarts(data.cartUser.products);
+      setIdProCart(data.cartUser._id);
+      setTotalCart(data.cartUser.totalPrice);
+      setLengthCart(data.cartLength);
+    }
+  };
+
+  //delete pro cart
+  const deleteCartPro = async (product) => {
+    const data = await deleteListProCart(idProCar, product);
+    if (data) {
+      getByUserCarts();
+      alert("xoa thanh cong");
+    } else {
+      alert("xoa that bai");
+    }
   };
 
   useEffect(() => {
@@ -100,10 +144,16 @@ const Menu = () => {
       setInterval(() => {
         fcRefreshToken();
       }, 10000);
+    } else {
+      getIdUserOther();
     }
-
-    getIdUserOther();
   }, []);
+
+  useEffect(() => {
+    if (idUserOther || idUser) {
+      getByUserCarts();
+    }
+  }, [idUserOther, idUser, callCart]);
 
   return (
     <div className="w-[100%] p-1 h-[100px] flex" id="menu">
@@ -225,7 +275,7 @@ const Menu = () => {
         <div className="p-2">
           <h4 className="text-black text-[22px]">Giỏ hàng</h4>
           <p className="flex text-green-600 font-bold text-[16px] items-center">
-            10.000 đ
+            {totalCart || 0} đ
             <span className="text-black pl-[10px]">
               <FaChevronDown size="12px" />
             </span>
@@ -235,7 +285,7 @@ const Menu = () => {
           className="w-[30px] h-[30px] flex items-center justify-center
         rounded-[100%] bg-red-600 text-white text-[12px] font-medium"
         >
-          1
+          {lengthCart}
         </span>
         {/* gio hang mini */}
         <div
@@ -244,50 +294,68 @@ const Menu = () => {
               ? " bg-white visible opacity-100 animate-menuMiniTop"
               : "invisible opacity-0 animate-menuMiniDown duration-[0.5s]"
           } top-[14%] absolute right-[10%] shadow-md 
-          after:content-[''] after:h-[20px] after:w-[20px] after:bg-white
-          after:absolute after:top-[-6%] after:right-[20%] after:rotate-45
+          after:content-[''] ${
+            dataCarts.length === 0 ? "after:top-[-8.3%]" : "after:top-[-4%]"
+          } after:h-[20px] after:w-[20px] after:bg-white
+          after:absolute  after:right-[20%] after:rotate-45
           after:border-gray-200 after:border-l-[2px] after:border-t-[2px]
           border-gray-200 border-[2px] `}
           id="cartMini"
         >
           {/* thong tin sach dat */}
-          <div className="flex p-6 pb-[10px] border-b-[2px]  border-gray-200">
-            <span>
-              <a href="#">
-                <span>
-                  <img
-                    src="https://htmldemo.net/pustok/pustok/image/products/cart-product-1.jpg"
-                    className="w-[80px]"
-                  />
-                </span>
-              </a>
-            </span>
-            {/* ten */}
-            <div className="flex flex-col">
-              <a href="#">
-                <p className="text-[14px] font-medium hover:text-green-600 duration-[0.5s] pl-[3%]">
-                  Kodak PIXPRO Astro Zoom AZ421 16 MP
-                </p>
-              </a>
-              {/* gia so luong */}
-              <div className="pl-[3%] pt-[2%]">
-                <span>
-                  1 x
-                  <span className="text-[20px] text-green-600 font-bold pl-[5px]">
-                    10.000 đ
-                  </span>
-                </span>
-              </div>
-            </div>
-            {/* xoa */}
-            <span
-              className="w-[20px] h-[20px] bg-gray-400 text-white flex items-center justify-center 
-            rounded-[3px] hover:opacity-[0.4] duration-[0.5s] hover:text-black
-            mt-[16%]"
-            >
-              <IoClose size="14px" />
-            </span>
-          </div>
+          {dataCarts.length === 0 ? (
+            <p className="text-[16px] font-[500] text-center p-[20px]">
+              Không có sản phẩm nào trong giỏ hàng !
+            </p>
+          ) : (
+            <>
+              {dataCarts.map((i) => {
+                return (
+                  <div
+                    className="flex p-6 pb-[10px] border-b-[2px]  border-gray-200"
+                    key={i.productId._id}
+                  >
+                    <span>
+                      <a href="#">
+                        <span>
+                          <img src={i.productId.image} className="w-[80px]" />
+                        </span>
+                      </a>
+                    </span>
+                    {/* ten */}
+                    <div className="flex flex-col">
+                      <a href="#">
+                        <p className="text-[14px] font-medium hover:text-green-600 duration-[0.5s] pl-[3%]">
+                          {i.productId.name}
+                        </p>
+                      </a>
+                      {/* gia so luong */}
+                      <div className="pl-[3%] pt-[2%]">
+                        <span>
+                          {i.quantity} x
+                          <span className="text-[20px] text-green-600 font-bold pl-[5px]">
+                            {(i.productId.price *
+                              (100 - i.productId.discount)) /
+                              100}
+                            đ
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                    {/* xoa */}
+                    <span
+                      className="w-[20px] h-[20px] bg-gray-400 text-white flex items-center justify-center 
+  rounded-[3px] hover:opacity-[0.4] duration-[0.5s] hover:text-black
+  mt-[16%]"
+                      onClick={() => deleteCartPro(i.productId._id)}
+                    >
+                      <IoClose size="14px" />
+                    </span>
+                  </div>
+                );
+              })}
+            </>
+          )}
           {/* xem gio va dat hang */}
           <div className="flex justify-center p-4">
             <span
