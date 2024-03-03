@@ -33,7 +33,7 @@ const SingIn = () => {
 
   const navigate = useNavigate();
 
-  const cookies = new Cookies();
+  // const cookies = new Cookies();
 
   //function
   const submit = async (e) => {
@@ -51,8 +51,16 @@ const SingIn = () => {
     if (checkVali === true) {
       const datas = await singIns({ data });
       if (datas) {
-        cookies.set("access_token", datas.accessToken);
-        cookies.set("refresh_token", datas.refreshToken);
+        // cookies.set("access_token", datas.accessToken);
+        // cookies.set("refresh_token", datas.refreshToken);
+        window.sessionStorage.setItem(
+          "refresh_token",
+          JSON.stringify(datas.refreshToken)
+        );
+        window.sessionStorage.setItem(
+          "access_token",
+          JSON.stringify(datas.accessToken)
+        );
         window.sessionStorage.setItem("lg", "Login");
         navigate("/trang-chu", { state: { login } });
         alert("Thanh cong");

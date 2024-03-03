@@ -1,3 +1,4 @@
+let mongoose = require("mongoose");
 const ListCarts = require("../modal/listCarts");
 
 //get all
@@ -29,13 +30,13 @@ const getByUserCart = async (req, res) => {
       data = await ListCarts.findOne({ user })
         .populate("products")
         .populate("products.productId")
-        .populate("user")
+        .populate("user", ["name", "email"])
         .populate("userOther");
     } else {
       data = await ListCarts.findOne({ userOther })
         .populate("products")
         .populate("products.productId")
-        .populate("user")
+        .populate("user", ["name", "email"])
         .populate("userOther");
     }
 
@@ -59,7 +60,7 @@ const getByUserCart = async (req, res) => {
 
 //add
 const addCart = async (req, res) => {
-  let { product, quantity, total, user, userOther, totalPrice, sale } =
+  const { product, quantity, total, user, userOther, totalPrice, sale } =
     req.body;
 
   if (product === "" || quantity === "" || total === "" || totalPrice === "") {
@@ -106,15 +107,24 @@ const addCart = async (req, res) => {
 
     //check id product
     if (checkIdPro) {
+      //get pro
+      const proDetail = chekcIDCart.products.filter(
+        (i) => i.productId._id.toString() === product
+      );
+
+      //lay so thu thu trong mang
+      const index = chekcIDCart.products.findIndex(
+        (i) => i.productId._id.toString() === product
+      );
+
       //quantity
-      let quantitys = chekcIDCart.products.map((i) => i.quantity);
+      const quantitys = proDetail.map((i) => i.quantity);
+
+      chekcIDCart.products[index].quantity = parseInt(quantitys) + quantity;
+
+      await chekcIDCart.save();
 
       const updateCarts = await ListCarts.findByIdAndUpdate(chekcIDCart._id, {
-        products: {
-          productId: product,
-          quantity: parseInt(quantitys) + quantity,
-          total,
-        },
         totalPrice: chekcIDCart.totalPrice + totalPrice,
       })
         .populate("products")
@@ -174,21 +184,32 @@ const editCart = async (req, res) => {
     return res.status(400).json({ success: false, message: "not null" });
   }
   try {
-    const pro = await ListCarts.findById(id).populate("products.productId");
+    const pro = await ListCarts.findById(id)
+      .populate("products")
+      .populate("products.productId");
+
     const totalPro = total * quantity;
     const price = pro.totalPrice;
-    const quantitys = pro.products.map((i) => i.quantity);
+
+    const proDetail = pro.products.filter(
+      (i) => i.productId._id.toString() === product
+    );
+
+    //lay so thu tu ptu trong amng
+    const itemIdex = pro.products.findIndex(
+      (i) => i.productId._id.toString() === product
+    );
+
+    const quantitys = proDetail.map((i) => i.quantity);
+
+    pro.products[itemIdex].quantity =
+      type === "tang"
+        ? parseInt(quantitys) + quantity
+        : parseInt(quantitys) - quantity;
+
+    await pro.save();
 
     const data = await ListCarts.findByIdAndUpdate(id, {
-      products: {
-        productId: product,
-        quantity:
-          type === "tang"
-            ? parseInt(quantitys) + quantity
-            : parseInt(quantitys) - quantity,
-        total: total,
-      },
-      sale: 0,
       totalPrice: type === "tang" ? price + totalPro : price - totalPro,
     })
       .populate("products.productId")

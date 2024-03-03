@@ -8,7 +8,6 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { getALl, getByUserLove, removeProLove } from "../../action/listLove";
 import { getByUser, refreshTK } from "../../action/users";
 import LoadingProducts from "../loading/loadingProducts";
-import { Cookies } from "react-cookie";
 
 const ListLove = () => {
   const nagivate = useNavigate();
@@ -20,27 +19,24 @@ const ListLove = () => {
 
   const [loadingPro, setLoadingPro] = useState(false);
 
-  const cookie = new Cookies();
-
   //ham
   const getUserListLove = async () => {
     setLoadingPro(true);
-    const token = cookie.get("access_token");
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
     let data;
-    let user;
-    if (token) {
-      user = await getByUser();
-    }
-
-    if (!user) {
-      data = await getByUserLove(idUserOther, null);
+    let datas;
+    if (!userOther) {
+      data = await getByUser();
+      if (data) {
+        datas = await getByUserLove(null, data._id);
+      }
     } else {
-      data = await getByUserLove(null, user._id);
+      datas = await getByUserLove(idUserOther, null);
     }
 
-    if (data) {
-      setListLove(data.products);
-      setIdList(data._id);
+    if (datas) {
+      setListLove(datas.products);
+      setIdList(datas._id);
       setLoadingPro(false);
     }
   };
@@ -52,12 +48,12 @@ const ListLove = () => {
 
   //rf token
   const fcRefreshToken = async () => {
-    const rfTK = cookie.get("refresh_token");
+    const rfTK = JSON.parse(window.sessionStorage.getItem("refresh_token"));
 
     if (rfTK) {
-      const token = await refreshTK({ rfTK });
+      const token = await refreshTK(rfTK);
       if (token) {
-        cookie.set("access_token", token);
+        window.sessionStorage.setItem("access_token", JSON.stringify(token));
       }
     }
   };
@@ -66,9 +62,9 @@ const ListLove = () => {
     getUserListLove();
 
     //user
-    const token = cookie.get("access_token");
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
 
-    if (token) {
+    if (!userOther) {
       setInterval(() => {
         fcRefreshToken();
       }, 10000);

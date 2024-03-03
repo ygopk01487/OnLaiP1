@@ -12,12 +12,11 @@ import {
   getByUserLove,
   removeProLove,
 } from "../../action/listLove";
-import { Cookies } from "react-cookie";
 import { getByIdUserOther } from "../../action/usersOther";
 import Toast from "../toast/Toast";
 import { closeToast, showToast } from "../toast/ShowToast";
 import { getByUser, refreshTK } from "../../action/users";
-import { addListCart, getListCartByUser } from "../../action/listCart";
+import { addListCart } from "../../action/listCart";
 
 const HomeSection = () => {
   const [openShow, setOpenShow] = useState(false);
@@ -69,13 +68,9 @@ const HomeSection = () => {
 
   const [listLove, setListLove] = useState([]);
 
-  const [loadToast, setLoadToast] = useState(false);
-  const [checkToast, setCheckToast] = useState(false);
-  const [mess, setMess] = useState("");
-
-  const cookie = new Cookies();
-
-  const [loadBtn, setLoadBtn] = useState(false);
+  // const [loadToast, setLoadToast] = useState(false);
+  // const [checkToast, setCheckToast] = useState(false);
+  // const [mess, setMess] = useState("");
 
   //ham
   const openS = () => setOpenShow((i) => !i);
@@ -130,76 +125,64 @@ const HomeSection = () => {
 
   //add list love
   const addListLoves = async (idProduct) => {
-    if (loadBtn === false) {
-      console.log("add");
-      //get userOne
-      const token = cookie.get("access_token");
-      let user;
-      if (token) {
-        user = await getByUser();
-      }
-      //get id user
-      let datas;
-      if (!user) {
-        datas = await getByIdUserOther(userOther.localId);
-      }
-      let data;
-      if (datas) {
-        data = await addListLove(datas._id, idProduct, null);
-      } else {
-        data = await addListLove(null, idProduct, user._id);
-      }
+    setLoadingProducts(true);
 
-      if (data) {
-        getListUserLove();
-        setLoadToast(true);
-        setCheckToast(true);
-        setMess("Thêm vào danh sách yêu thích");
-      } else {
-        setLoadToast(true);
-        setCheckToast(false);
-        setMess("Thêm vào danh sách yêu thích");
-      }
+    //get userOne
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+    let user;
+    if (!userOther) {
+      user = await getByUser();
+    }
+    //get id user
+    let datas;
+    if (!user) {
+      datas = await getByIdUserOther(userOther.localId);
+    }
+    let data;
+    if (datas) {
+      data = await addListLove(datas._id, idProduct, null);
+    } else {
+      data = await addListLove(null, idProduct, user._id);
+    }
+
+    if (data) {
+      getListUserLove();
+      setLoadingProducts(false);
+    } else {
+      alert("thêm vào danh sách yêu thích thất bại");
     }
   };
 
   //delete love
   const deleteLove = async (idProduct) => {
-    setLoadBtn(true);
-    if (loadBtn === false) {
-      console.log("delete");
-      const token = cookie.get("access_token");
-      let user;
-      if (token) {
-        user = await getByUser();
-      }
-      let datas;
-      if (!user) {
-        //get id userOther
-        datas = await getByIdUserOther(userOther.localId, null);
+    setLoadingProducts(true);
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+    let user;
+    if (!userOther) {
+      user = await getByUser();
+    }
+    let datas;
+    if (!user) {
+      //get id userOther
+      datas = await getByIdUserOther(userOther.localId, null);
+    }
+
+    //get by id list love
+    if (datas || user) {
+      let idUser;
+      if (!datas) {
+        idUser = await getByUserLove(null, user._id);
+      } else {
+        idUser = await getByUserLove(datas._id, null);
       }
 
-      //get by id list love
-      if (datas || user) {
-        let idUser;
-        if (!datas) {
-          idUser = await getByUserLove(null, user._id);
+      if (idUser) {
+        const data = await removeProLove(idUser._id, idProduct);
+        if (data) {
+          getListUserLove();
+          setLoadingProducts(false);
         } else {
-          idUser = await getByUserLove(datas._id, null);
-        }
-
-        if (idUser) {
-          const data = await removeProLove(idUser._id, idProduct);
-          if (data) {
-            getListUserLove();
-            setLoadToast(true);
-            setCheckToast(true);
-            setMess("xóa sản phẩm yêu thích ");
-          } else {
-            setLoadToast(true);
-            setCheckToast(false);
-            alert("xóa sản phẩm  yeu thích ");
-          }
+          alert("xóa vào danh sách yêu thích thất bại");
         }
       }
     }
@@ -208,22 +191,23 @@ const HomeSection = () => {
   //get user list love
   const getListUserLove = async () => {
     //get userOne
-    const token = cookie.get("access_token");
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+
     let user;
-    if (token) {
-      user = await getByUser();
-    }
     let datas;
     let data;
-    if (!user) {
+    if (!userOther) {
+      user = await getByUser();
+      if (user) {
+        data = await getByUserLove(null, user._id);
+      }
+    } else {
       datas = await getByIdUserOther(userOther.localId);
+      if (datas) {
+        data = await getByUserLove(datas._id, null);
+      }
     }
 
-    if (datas) {
-      data = await getByUserLove(datas._id, null);
-    } else {
-      data = await getByUserLove(null, user._id);
-    }
     if (data) {
       setListLove(data.products);
     }
@@ -232,12 +216,12 @@ const HomeSection = () => {
   //get cart by user
   //add cart
   const addListCarts = async (product, total, quanitty, totalPrice) => {
-    const token = cookie.get("access_token");
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
     let user;
     let datas;
     let data;
 
-    if (token) {
+    if (!userOther) {
       user = await getByUser();
       if (user) {
         data = await addListCart(
@@ -264,8 +248,8 @@ const HomeSection = () => {
     }
 
     if (data) {
-      window.localStorage.setItem("addCart", "true");
       alert("them vao gio hang thanh cong");
+      // window.location.reload();
     } else {
       alert("them vao gio hang that bai");
     }
@@ -275,12 +259,12 @@ const HomeSection = () => {
 
   //rf token
   const fcRefreshToken = async () => {
-    const rfTK = cookie.get("refresh_token");
+    const rfTK = JSON.parse(window.sessionStorage.getItem("refresh_token"));
 
     if (rfTK) {
-      const token = await refreshTK({ rfTK });
+      const token = await refreshTK(rfTK);
       if (token) {
-        cookie.set("access_token", token);
+        window.sessionStorage.setItem("access_token", JSON.stringify(token));
       }
     }
   };
@@ -290,28 +274,25 @@ const HomeSection = () => {
 
     getListUserLove();
 
-    const token = cookie.get("access_token");
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
 
-    if (token) {
+    if (!userOther) {
       setInterval(() => {
         fcRefreshToken();
       }, 10000);
     }
   }, []);
 
-  useEffect(() => {
-    //set loading toast
-    if (loadToast === true) {
-      showToast();
-      setTimeout(() => {
-        setLoadToast(false);
-        closeToast();
-        setLoadBtn(false);
-      }, 2000);
-    }
-
-    //load btn
-  }, [addListLoves, deleteLove]);
+  // useEffect(() => {
+  //   //set loading toast
+  //   if (loadToast === true) {
+  //     showToast();
+  //     setTimeout(() => {
+  //       setLoadToast(false);
+  //       closeToast();
+  //     }, 2000);
+  //   }
+  // }, [addListLoves, deleteLove]);
 
   useEffect(() => {
     if (name) {
@@ -329,7 +310,7 @@ const HomeSection = () => {
 
   return (
     <>
-      <Toast checkToast={checkToast} mess={mess} />
+      {/* <Toast checkToast={checkToast} mess={mess} /> */}
       <div className="w-[100%] mt-[20px]">
         {/* tieu de */}
         <div className="flex text-[14px]">
@@ -510,12 +491,7 @@ const HomeSection = () => {
                                 listLove.some((i) => i._id === product._id)
                                   ? "text-green-500"
                                   : ""
-                              }
-                             ${
-                               loadBtn === true
-                                 ? "cursor-not-allowed"
-                                 : "cursor-pointer"
-                             }  hover:text-green-600 duration-[0.5s]`}
+                              } hover:text-green-600 duration-[0.5s]`}
                               onClick={() =>
                                 listLove.some((i) => i._id === product._id)
                                   ? deleteLove(product._id)

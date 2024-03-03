@@ -15,7 +15,7 @@ import { getByUser, logOUT, refreshTK } from "../../action/users";
 import { getByIdUserOther } from "../../action/usersOther";
 import { deleteListProCart, getListCartByUser } from "../../action/listCart";
 
-const Menu = () => {
+const Menu = ({ test }) => {
   const [openMenuU, setOpenMenuU] = useState(false);
   const [openCartMini, setOpenCartMini] = useState(false);
   const [search, setSearch] = useState(
@@ -45,10 +45,6 @@ const Menu = () => {
   const [idUser, setIdUser] = useState("");
   const [lengthCart, setLengthCart] = useState(0);
 
-  const [callCart, setCallCart] = useState(
-    "" || window.localStorage.getItem("addCart")
-  );
-
   // ham
   const openMenuUser = () => {
     setOpenMenuU((i) => !i);
@@ -74,23 +70,28 @@ const Menu = () => {
 
   //rf token
   const fcRefreshToken = async () => {
-    const rfTK = cookie.get("refresh_token");
+    const rfTK = JSON.parse(window.sessionStorage.getItem("refresh_token"));
 
     if (rfTK) {
-      const token = await refreshTK({ rfTK });
+      const token = await refreshTK(rfTK);
       if (token) {
-        cookie.set("access_token", token);
+        window.sessionStorage.setItem("access_token", JSON.stringify(token));
       }
     }
   };
 
   //lgOut;
   const logOuts = async () => {
-    const refreshTks = cookie.get("refresh_token");
-    await logOUT({ refreshTks });
-    cookie.remove("refresh_token");
-    cookie.remove("access_token");
-    window.localStorage.removeItem("lg");
+    const refreshTks = JSON.parse(
+      window.sessionStorage.getItem("refresh_token")
+    );
+
+    await logOUT(refreshTks);
+    // cookie.remove("refresh_token");
+    // cookie.remove("access_token");
+    window.sessionStorage.removeItem("refresh_token");
+    window.sessionStorage.removeItem("lg");
+    window.sessionStorage.removeItem("access_token");
     navigate("/dang-nhap");
   };
 
@@ -106,9 +107,10 @@ const Menu = () => {
 
   //get cart by user
   const getByUserCarts = async () => {
-    const token = cookie.get("access_token");
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+
     let data;
-    if (token) {
+    if (!userOther) {
       data = await getListCartByUser(null, idUser);
     } else {
       data = await getListCartByUser(idUserOther, null);
@@ -137,9 +139,9 @@ const Menu = () => {
     //menu scroll
     ScrollMenu();
 
-    const token = cookie.get("access_token");
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
 
-    if (token) {
+    if (!userOther) {
       fcUser();
       setInterval(() => {
         fcRefreshToken();
@@ -153,7 +155,12 @@ const Menu = () => {
     if (idUserOther || idUser) {
       getByUserCarts();
     }
-  }, [idUserOther, idUser, callCart]);
+  }, [idUserOther, idUser]);
+
+  // useEffect(() => {
+  //   console.log("hello");
+  // }, [test]);
+  // console.log(test);
 
   return (
     <div className="w-[100%] p-1 h-[100px] flex" id="menu">
@@ -192,7 +199,7 @@ const Menu = () => {
         <span>
           <img
             className="w-[45px] rounded-[50%] color-white"
-            src={user.photoUrl || image}
+            src={user.photoUrl || images}
           />
         </span>
         <div className=" flex flex-col items-center ml-[5px]">

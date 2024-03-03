@@ -6,10 +6,7 @@ const connectURL = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWO
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(connectURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(connectURL, {});
     console.log("ConnectDB trueeee!!!!!!!!!!!");
   } catch (error) {
     console.log("ConnectDB Fails!!!!!!!");

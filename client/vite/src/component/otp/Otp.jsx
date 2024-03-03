@@ -132,8 +132,6 @@ const Otp = () => {
     setOtp(new Array(4).fill(""));
   };
 
-  console.log(otp);
-
   //loading
   const loadingPage = () => {
     setTimeout(() => {

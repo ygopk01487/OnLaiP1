@@ -52,18 +52,18 @@ export const getByUser = async () => {
   }
 };
 
-export const refreshTK = async ({ rfTK }) => {
+export const refreshTK = async (rfTK) => {
   try {
-    const datas = await refreshTokens({ refreshToken: rfTK });
+    const datas = await refreshTokens(rfTK);
     return datas.data.accessToken;
   } catch (error) {
     console.log("refresh token fail!!!");
   }
 };
 
-export const logOUT = async ({ refreshTks }) => {
+export const logOUT = async (refreshTks) => {
   try {
-    const data = await logOuts({ refreshTks });
+    const data = await logOuts(refreshTks);
   } catch (error) {
     console.log("log out  fail!!!");
   }

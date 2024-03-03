@@ -97,8 +97,8 @@
   /* gio hang */
   .icon-add-remove-carts {
     @apply w-[40px] h-[30px] flex items-center
-    rounded-[3px] justify-center text-white bg-green-600 cursor-pointer
-    hover:bg-black duration-[0.5s] font-[700];
+    rounded-[3px] justify-center text-white bg-green-600
+    hover:bg-black duration-[0.5s] font-[700] cursor-pointer;
   }
   .button-carts {
     @apply p-3 bg-white  border-[2px] border-gray-200

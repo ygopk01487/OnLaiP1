@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Menu from "../nvabar/menu";
 import Footer from "../footer/Footer";
 import { MdNavigateNext } from "react-icons/md";
@@ -6,9 +6,123 @@ import { FaTrash } from "react-icons/fa";
 import { IoIosAdd } from "react-icons/io";
 import { IoIosRemove } from "react-icons/io";
 import BackToTop from "../backToTop/BackToTop";
+import {
+  deleteListProCart,
+  editListCart,
+  getListCartByUser,
+} from "../../action/listCart";
+import { getByIdUserOther } from "../../action/usersOther";
+import { getByUser, refreshTK } from "../../action/users";
+import { useNavigate } from "react-router-dom";
+import LoadingProducts from "../loading/loadingProducts";
 
 const Carts = () => {
-  const numers = [1, 2, 3];
+  const [dataCart, setDataCart] = useState([]);
+  const [quantityPro, setQuantityPro] = useState(1);
+  const [user, setUser] = useState(
+    JSON.parse(window.sessionStorage.getItem("user")) || ""
+  );
+  const [idUserOther, serIdUserOther] = useState("");
+  const [idUser, setIdUser] = useState("");
+  const [totalCart, setTotalCart] = useState(0);
+  const [idCart, setIdCart] = useState("");
+
+  const [loadCart, setLoadCart] = useState(false);
+
+  const navigate = useNavigate();
+
+  //ham
+  //get userOne
+  const fcUser = async () => {
+    const user = await getByUser();
+    if (user) {
+      setIdUser(user._id);
+    }
+  };
+
+  //rf token
+  const fcRefreshToken = async () => {
+    const rfTK = JSON.parse(window.sessionStorage.getItem("refresh_token"));
+
+    if (rfTK) {
+      const token = await refreshTK(rfTK);
+      if (token) {
+        window.sessionStorage.setItem("access_token", JSON.stringify(token));
+      }
+    }
+  };
+
+  //get useOther
+  const getIdUserOther = async () => {
+    const localId = user.localId;
+    const data = await getByIdUserOther(localId);
+
+    if (data) {
+      serIdUserOther(data._id);
+    }
+  };
+
+  //get userCart
+  const getByUserCarts = async () => {
+    setLoadCart(true);
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+    let data;
+    if (!userOther) {
+      data = await getListCartByUser(null, idUser);
+    } else {
+      data = await getListCartByUser(idUserOther, null);
+    }
+
+    if (data) {
+      setDataCart(data.cartUser.products);
+      setTotalCart(data.cartUser.totalPrice);
+      setIdCart(data.cartUser._id);
+      setLoadCart(false);
+    }
+  };
+
+  //edit cart
+  const editListCarts = async (product, quantity, total, type) => {
+    setQuantityPro(quantityPro + 1);
+    const data = await editListCart(idCart, product, quantity, total, type);
+    if (data) {
+      getByUserCarts();
+      alert("sua thanh cong");
+    } else {
+      alert("sua that bai");
+    }
+  };
+
+  //xoa cart list
+  const removeListCarts = async (product) => {
+    const data = await deleteListProCart(idCart, product);
+    if (data) {
+      getByUserCarts();
+      alert("xoa thanh cong");
+    } else {
+      alert("xoa that bai");
+    }
+  };
+
+  useEffect(() => {
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+
+    if (!userOther) {
+      fcUser();
+      setInterval(() => {
+        fcRefreshToken();
+      }, 10000);
+    } else {
+      getIdUserOther();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (idUser || idUserOther) {
+      getByUserCarts();
+    }
+  }, [idUser, idUserOther]);
+
   return (
     <div className="w-[100%]">
       <div className="w-[1200px] m-auto">
@@ -27,84 +141,138 @@ const Carts = () => {
             <span className="text-[16px] font-[400] pr-[5px]">Giỏ hàng</span>
           </div>
           {/* danh sach gio hang */}
-          <div className="w-[100%]">
-            <table className="border-collapse border-[2px] border-gray-200 shadow-md w-[100%]">
-              <thead>
-                <tr>
-                  <th className="text-th-talble-listLove">Hình</th>
-                  <th className="text-th-talble-listLove">Tên sản phẩm</th>
-                  <th className="text-th-talble-listLove">Giá</th>
-                  <th className="text-th-talble-listLove">Số lượng</th>
-                  <th className="text-th-talble-listLove">Tổng tiền</th>
-                  <th className="text-th-talble-listLove">Xóa</th>
-                </tr>
-              </thead>
-              <tbody>
-                {numers.map((i, idx) => {
-                  return (
-                    <tr key={idx} className="duration-[0.5s] hover:bg-white">
-                      <td className="cursor-pointer">
-                        <span className="flex justify-center border-tbody-listLove p-3">
-                          <img
-                            src="https://htmldemo.net/pustok/pustok/image/products/product-1.jpg"
-                            className="w-[100px]"
+          {loadCart ? (
+            <LoadingProducts top="40%" />
+          ) : (
+            <>
+              <div className="w-[100%]">
+                <table className="border-collapse border-[2px] border-gray-200 shadow-md w-[100%]">
+                  <thead>
+                    <tr>
+                      <th className="text-th-talble-listLove">Hình</th>
+                      <th className="text-th-talble-listLove">Tên sản phẩm</th>
+                      <th className="text-th-talble-listLove">Giá</th>
+                      <th className="text-th-talble-listLove">Số lượng</th>
+                      <th className="text-th-talble-listLove">Tổng tiền</th>
+                      <th className="text-th-talble-listLove">Xóa</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dataCart.map((i) => {
+                      return (
+                        <tr
+                          key={i._id}
+                          className="duration-[0.5s] hover:bg-white"
+                        >
+                          <td className="cursor-pointer">
+                            <span className="flex justify-center border-tbody-listLove p-3">
+                              <img
+                                src={i.productId.image}
+                                className="w-[100px]"
+                              />
+                            </span>
+                          </td>
+                          <td className="border-tbody-listLove p-3">
+                            <h3 className="text-hover-listLove cursor-pointer text-center text-[16px] font-[500]">
+                              {i.productId.name}
+                            </h3>
+                          </td>
+                          <td className="border-tbody-listLove p-3">
+                            <span className="text-[16px] font-[400] flex items-center justify-center">
+                              {(i.productId.price *
+                                (100 - i.productId.discount)) /
+                                100}
+                              đ
+                            </span>
+                          </td>
+                          <td className="border-tbody-listLove p-3">
+                            <div className="flex items-center justify-center">
+                              <span
+                                className={`${
+                                  i.quantity <= 1
+                                    ? "pointer-events-none"
+                                    : "pointer-events-auto"
+                                } icon-add-remove-carts`}
+                                onClick={() =>
+                                  editListCarts(
+                                    i.productId._id,
+                                    1,
+                                    i.total,
+                                    "giam"
+                                  )
+                                }
+                              >
+                                <IoIosRemove size="18px" />
+                              </span>
+                              <span className="text-[16px] font-[700] p-2">
+                                {i.quantity}
+                              </span>
+                              <span
+                                className={`${
+                                  i.quantity >= 10
+                                    ? " pointer-events-none"
+                                    : " pointer-events-auto"
+                                } icon-add-remove-carts`}
+                                onClick={() =>
+                                  editListCarts(
+                                    i.productId._id,
+                                    1,
+                                    i.total,
+                                    "tang"
+                                  )
+                                }
+                              >
+                                <IoIosAdd size="18px" />
+                              </span>
+                            </div>
+                          </td>
+                          <td className="border-tbody-listLove p-3">
+                            <span className="text-[16px] font-[400] flex items-center justify-center">
+                              {i.quantity *
+                                ((i.productId.price *
+                                  (100 - i.productId.discount)) /
+                                  100)}
+                              đ
+                            </span>
+                          </td>
+                          <td className="border-tbody-listLove p-3">
+                            <span
+                              className="cursor-pointer text-hover-listLove p-3 flex items-center justify-center"
+                              onClick={() => removeListCarts(i.productId._id)}
+                            >
+                              <FaTrash size="16px" />
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    <tr className="p-[30px] w-[100%] border-[2px] border-gray-200">
+                      <td colSpan={6} className="w-[100%] p-[22px]">
+                        <div className="flex border-[2px] border-gray-200 p-[20px] justify-between">
+                          <input
+                            className="outline-none p-3 rounded-[3px] bg-gray-300 border-[1px] border-gray-200
+                        mr-[30px]"
+                            placeholder="Nhập mã giảm giá..."
                           />
-                        </span>
-                      </td>
-                      <td className="border-tbody-listLove p-3">
-                        <h3 className="text-hover-listLove cursor-pointer text-center text-[16px] font-[500]">
-                          Rinosin Glasses
-                        </h3>
-                      </td>
-                      <td className="border-tbody-listLove p-3">
-                        <span className="text-[16px] font-[400] flex items-center justify-center">
-                          10.000 đ
-                        </span>
-                      </td>
-                      <td className="border-tbody-listLove p-3">
-                        <div className="flex items-center justify-center">
-                          <span className="icon-add-remove-carts">
-                            <IoIosRemove size="18px" />
-                          </span>
-                          <span className="text-[16px] font-[700] p-2">1</span>
-                          <span className="icon-add-remove-carts">
-                            <IoIosAdd size="18px" />
-                          </span>
+                          <button className="button-carts w-[12%]">
+                            Áp dụng
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-center pt-[20px]">
+                          <button
+                            className="button-carts w-[18%]"
+                            onClick={() => navigate("/trang-chu")}
+                          >
+                            Cập nhật giỏ hàng
+                          </button>
                         </div>
                       </td>
-                      <td className="border-tbody-listLove p-3">
-                        <span className="text-[16px] font-[400] flex items-center justify-center">
-                          10.000 đ
-                        </span>
-                      </td>
-                      <td className="border-tbody-listLove p-3">
-                        <span className="cursor-pointer text-hover-listLove p-3 flex items-center justify-center">
-                          <FaTrash size="16px" />
-                        </span>
-                      </td>
                     </tr>
-                  );
-                })}
-                <tr className="p-[30px] w-[100%] border-[2px] border-gray-200">
-                  <td colSpan={6} className="w-[100%] p-[22px]">
-                    <div className="flex border-[2px] border-gray-200 p-[20px] justify-between">
-                      <input
-                        className="outline-none p-3 rounded-[3px] bg-gray-300 border-[1px] border-gray-200
-                        mr-[30px]"
-                        placeholder="Nhập mã giảm giá..."
-                      />
-                      <button className="button-carts w-[12%]">Áp dụng</button>
-                    </div>
-                    <div className="flex items-center justify-center pt-[20px]">
-                      <button className="button-carts w-[18%]">
-                        Cập nhật giỏ hàng
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
           {/* giao dien tong tien */}
           <div className="flex flex-col float-right items-end w-[35%]  p-[20px]">
             <div
@@ -118,7 +286,7 @@ const Carts = () => {
                 <div className="flex justify-between pb-[10px]">
                   <span className="text-[15px] font-[400]">Tổng tiền</span>
                   <span className="text-green-600 font-[500] text-[16px]">
-                    10.000 đ
+                    {totalCart} đ
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -131,7 +299,7 @@ const Carts = () => {
               <div className="p-[10px] flex justify-between">
                 <span className="text-[18px]">Tổng tất cả tiền</span>
                 <span className="text-green-600 font-[500] text-[18px]">
-                  10.000 đ
+                  {totalCart} đ
                 </span>
               </div>
             </div>

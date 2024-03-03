@@ -11,9 +11,27 @@ import { backToReview } from "../jsAnimation/animation";
 import BackToTop from "../backToTop/BackToTop";
 import { useLocation } from "react-router-dom";
 import { getById } from "../../action/products";
+import { getByUser, refreshTK } from "../../action/users";
+import { getByIdUserOther } from "../../action/usersOther";
+import { addListCart } from "../../action/listCart";
+import io from "socket.io-client";
+
+const socket = io.connect("http://localhost:5000");
+import {
+  addListLove,
+  getByUserLove,
+  removeProLove,
+} from "../../action/listLove";
+import {
+  addReview,
+  deleteCm,
+  editReview,
+  getReviewById,
+} from "../../action/reviews";
+import { FaEllipsisV } from "react-icons/fa";
 
 const ProductDetail = () => {
-  const stars = [1, 2, 3, 4, 5];
+  const stars = [5, 4, 3, 2, 1];
   const [ac, setAc] = useState(true);
   const [product, setProduct] = useState({
     name: "",
@@ -22,18 +40,77 @@ const ProductDetail = () => {
     discount: "",
     category: "",
     describe: "",
+    _id: "",
   });
   const number = [1, 2, 3, 4];
   const location = useLocation();
   const id = location.state.id;
 
+  const [numberPro, setNumberPro] = useState(1);
+
+  const [listLoveUser, setListLoveUser] = useState([]);
+
+  const [star, setStar] = useState("");
+
+  const [idListLove, setIdListLove] = useState("");
+
+  const [reviewData, setReviewData] = useState([]);
+
+  const [reviewDataRealTime, setReviewDataRealTime] = useState([]);
+
+  const [openMenuRv, setOpenMenuRv] = useState(false);
+
+  const [comment, setComment] = useState("");
+
+  const [textRv, setTextRv] = useState(false);
+
+  const [idRv, setIdRv] = useState("");
+
+  const [idCm, setIdCm] = useState("");
+
+  const [idUser, setIdUser] = useState("");
+
+  const [idUserOther, setIdUserOther] = useState("");
+
+  const [numberStar, setNumberStar] = useState(0);
+
+  //check open menu editCm
+  const [check, setCheck] = useState("");
+
+  const numberFormat = new Intl.NumberFormat("de-DE", {
+    style: "currency",
+    currency: "VND",
+  });
+
+  const relativeTime = [
+    { second: 1, name: "second", val: 60 },
+    { second: 60, name: "minute", val: 60 },
+    { second: 60 * 60, name: "hour", val: 24 },
+    { second: 60 * 60 * 24, name: "day", val: 7 },
+    { second: 60 * 60 * 24 * (365 / 12), name: "month", val: 30 },
+    { second: 60 * 60 * 24 * 365, name: "year", val: 12 },
+  ];
+
+  const getRelativeTime = (toDate) => {
+    const realTime = new Intl.RelativeTimeFormat(undefined, { style: "long" });
+    const seconds = Math.floor((new Date(toDate) - new Date()) / 1000);
+
+    for (let i = 0; i < relativeTime.length; i++) {
+      const { second, name, val } = relativeTime[i];
+      const duration = Math.abs(seconds) / second;
+      if (Math.abs(duration) < val || i === relativeTime.length - 1) {
+        return realTime.format(Math.floor(seconds / second), name);
+      }
+    }
+  };
+
+  //function
   const activeF = () => {
     setAc(false);
     backToReview();
   };
   const activeT = () => setAc(true);
 
-  //ham
   const getProductById = async () => {
     const data = await getById(id);
     setProduct({
@@ -43,12 +120,243 @@ const ProductDetail = () => {
       discount: data.discount,
       image: data.image,
       describe: data.describe,
+      _id: data._id,
     });
   };
 
+  //rf token
+  const fcRefreshToken = async () => {
+    const rfTK = JSON.parse(window.sessionStorage.getItem("refresh_token"));
+
+    if (rfTK) {
+      const token = await refreshTK(rfTK);
+      if (token) {
+        window.sessionStorage.setItem("access_token", JSON.stringify(token));
+      }
+    }
+  };
+
+  //add cart
+  const addCartProDetail = async () => {
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+    let data;
+    let datas;
+    const total = (product.price * (100 - product.discount)) / 100;
+    const totalPrice = total * numberPro;
+    if (!userOther) {
+      data = await getByUser();
+      if (data) {
+        datas = await addListCart(
+          data._id,
+          null,
+          product._id,
+          total,
+          numberPro,
+          totalPrice
+        );
+      }
+    } else {
+      data = await getByIdUserOther(userOther.localId);
+      datas = await addListCart(
+        null,
+        data._id,
+        product._id,
+        total,
+        numberPro,
+        totalPrice
+      );
+    }
+
+    if (datas) {
+      alert("thêm vào giỏ hàng thành công");
+    } else {
+      alert("thêm vào giỏ hành thất bại");
+    }
+  };
+
+  //check list love
+  const getByUserListLoves = async () => {
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+
+    let data;
+    let datas;
+    if (!userOther) {
+      data = await getByUser();
+      if (data) {
+        setIdUser(data._id);
+
+        datas = await getByUserLove(null, data._id);
+      }
+    } else {
+      data = await getByIdUserOther(userOther.localId);
+      if (data) {
+        setIdUserOther(data._id);
+
+        datas = await getByUserLove(data._id, null);
+      }
+    }
+
+    if (datas) {
+      setListLoveUser(datas.products);
+      setIdListLove(datas._id);
+    } else {
+      console.log("lay danh sach yeu thich theo user false");
+    }
+  };
+
+  //add list love
+  const addListLoves = async () => {
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+    let data;
+    let datas;
+    if (!userOther) {
+      data = await getByUser();
+      if (data) {
+        datas = await addListLove(null, product._id, data._id);
+      }
+    } else {
+      data = await getByIdUserOther(userOther.localId);
+      if (data) {
+        datas = await addListLove(data._id, product._id, null);
+      }
+    }
+
+    if (datas) {
+      getByUserListLoves();
+      alert("thêm danh sách yêu thích thành công");
+    } else {
+      alert("thêm dánh sách yêu thích thất bại");
+    }
+  };
+
+  //delete listLove
+  const deleteListLoves = async () => {
+    const data = await removeProLove(idListLove, product._id);
+    if (data) {
+      getByUserListLoves();
+      alert("Xóa thành công sản phẩm yêu thích");
+    } else {
+      alert("Xóa thất bại sản phẩm yêu thích");
+    }
+  };
+
+  //add review
+  const addRv = async () => {
+    if (star > 0) {
+      const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+      let data;
+      let datas;
+      if (!userOther) {
+        data = await getByUser();
+        if (data) {
+          datas = await addReview(data._id, null, star, comment, product._id);
+        }
+      } else {
+        data = await getByIdUserOther(userOther.localId);
+        if (data) {
+          datas = await addReview(null, data._id, star, comment, product._id);
+        }
+      }
+
+      if (datas) {
+        setComment("");
+        setStar(0);
+        setOpenMenuRv(false);
+        //comment real time
+        socket.emit("comment", datas.review);
+      }
+    } else {
+      alert("Thêm đánh giá sao");
+    }
+  };
+
+  //edit review
+  const editRv = async () => {
+    if (star > 0) {
+      const data = await editReview(star, comment, idRv, idCm);
+
+      if (data) {
+        // getRvById();
+        setComment("");
+        setStar(0);
+        setTextRv(false);
+        setOpenMenuRv(false);
+        //edit real time
+        socket.emit("comment", data.review);
+      }
+    } else {
+      alert("Thêm đánh giá sao");
+    }
+  };
+
+  //delete review
+  const deleteComment = async (idComment) => {
+    const data = await deleteCm(idRv, idComment);
+    if (data) {
+      // getRvById();
+
+      //delete real time
+      socket.emit("comment", data.review);
+    }
+  };
+
+  //get review by id
+  const getRvById = async () => {
+    const data = await getReviewById(product._id);
+    if (data) {
+      setReviewData(data.reviews.review);
+      setIdRv(data.reviews._id);
+      setNumberStar(data.numberStar);
+    }
+  };
+
+  //set edit review
+  const setEditRv = (comment, star, idComment) => {
+    setTextRv(true);
+    setComment(comment);
+    setStar(star);
+    setIdCm(idComment);
+  };
+
+  //set open menu rv
+  const setOpenMenuRvs = (idComment) => {
+    if (check !== idComment) {
+      setCheck(idComment);
+      setOpenMenuRv(true);
+    } else {
+      setOpenMenuRv((e) => !e);
+    }
+    setIdCm(idComment);
+  };
+
+  //
   useEffect(() => {
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+    if (!userOther) {
+      setInterval(() => {
+        fcRefreshToken();
+      }, 10000);
+    }
+
     getProductById();
+
+    getByUserListLoves();
   }, []);
+
+  useEffect(() => {
+    if (product._id) {
+      getRvById();
+    }
+  }, [product]);
+
+  useEffect(() => {
+    socket.on("new_comment", (data) => {
+      setReviewDataRealTime(data);
+    });
+  }, []);
+
+  let uiComment =
+    reviewDataRealTime.length > 0 ? reviewDataRealTime : reviewData;
 
   return (
     <div className="w-[100%]">
@@ -123,9 +431,13 @@ const ProductDetail = () => {
                   </div>
                   <div className="flex items-center pt-[10px]">
                     <span className="text-[19px] font-[500] text-green-600 pr-[8px]">
-                      {(product.price * (100 - product.discount)) / 100} đ
+                      {numberFormat.format(
+                        (product.price * (100 - product.discount)) / 100
+                      )}
                     </span>
-                    <del className="text-gray-400">{product.price} đ</del>
+                    <del className="text-gray-400">
+                      {numberFormat.format(product.price)}
+                    </del>
                   </div>
                   <div className="flex mt-[10px] pb-[10px]">
                     {stars.map((i, idx) => {
@@ -133,7 +445,9 @@ const ProductDetail = () => {
                         <span className="" key={idx}>
                           <IoIosStar
                             size="22px"
-                            className="text-yellow-400 rounded-[2px] pr-[2px]"
+                            className={`${
+                              i <= numberStar ? "text-yellow-400 " : ""
+                            }  rounded-[2px] pr-[2px]`}
                           />
                         </span>
                       );
@@ -142,7 +456,7 @@ const ProductDetail = () => {
                       className="text-[15px] font-[400] border-r-[2px] border-gray-300 pl-[8px] pr-[8px]
                     "
                     >
-                      (1 đánh giá)
+                      ({reviewData.length} đánh giá)
                     </span>
                     <span
                       className="cursor-pointer text-[15px] font-[400] pl-[8px]"
@@ -157,25 +471,57 @@ const ProductDetail = () => {
                     dress.
                   </p>
                   <div className="flex items-center pb-[10px]">
-                    <span className="icon-add-remove-carts">
+                    <span
+                      className={`icon-add-remove-carts ${
+                        numberPro >= 1
+                          ? "pointer-events-none"
+                          : "pointer-events-auto"
+                      } `}
+                      onClick={() => setNumberPro(numberPro - 1)}
+                    >
                       <IoIosRemove size="18px" />
                     </span>
-                    <span className="text-[16px] font-[700] p-2">1</span>
-                    <span className="icon-add-remove-carts">
+                    <span className="text-[16px] font-[700] p-2">
+                      {numberPro}
+                    </span>
+                    <span
+                      className={`icon-add-remove-carts ${
+                        numberPro >= 10
+                          ? "pointer-envets-none"
+                          : "pointer-events-auto"
+                      }`}
+                      onClick={() => setNumberPro(numberPro + 1)}
+                    >
                       <IoIosAdd size="18px" />
                     </span>
                     <button
                       className="p-[13px] bg-white w-[23%] border-[2px] border-green-600 text-[16px] font-[500]
                     rounded-[3px] duration-[0.5s] hover:text-white hover:bg-green-600 ml-[20px]"
+                      onClick={addCartProDetail}
                     >
                       Thêm vào giỏ
                     </button>
                   </div>
                   <div className="flex items-center cursor-pointer duration-[0.5s] hover:text-green-600">
-                    <span className="mr-[5px]">
+                    <span
+                      className={`mr-[5px] ${
+                        listLoveUser.some((i) => i._id === product._id)
+                          ? "text-green-700"
+                          : ""
+                      } `}
+                    >
                       <FaHeartCirclePlus size="20px" />
                     </span>
-                    <span className="text-[16px] font-[400] ">Yêu thích</span>
+                    <span
+                      className="text-[16px] font-[400] "
+                      onClick={
+                        listLoveUser.some((i) => i._id === product._id)
+                          ? deleteListLoves
+                          : addListLoves
+                      }
+                    >
+                      Yêu thích
+                    </span>
                   </div>
                 </div>
               </div>
@@ -199,7 +545,7 @@ const ProductDetail = () => {
              ${!ac ? "active before:left-[53.5%]" : ""}`}
                 onClick={activeF}
               >
-                Đánh giá (1)
+                Đánh giá ({uiComment.length})
               </h3>
             </div>
             {/* mo ta them */}
@@ -209,7 +555,7 @@ const ProductDetail = () => {
             {/* binh luan */}
             <div className={`${!ac ? "block" : "hidden"} w-[100%]`}>
               <h3 className="text-[18px] font-[500] pt-[20px] pb-[9px]">
-                Thêm đánh giá
+                {textRv ? "Sửa" : "Thêm"} đánh giá
               </h3>
               <div className="w-[100%]">
                 <span className="text-[16px] font-[400] ">
@@ -220,9 +566,12 @@ const ProductDetail = () => {
                     return (
                       <span
                         key={idx}
-                        className="pr-[15px] cursor-pointer duration-[0.5s]
+                        className={`${
+                          i <= star ? "text-yellow-400" : ""
+                        } pr-[15px] cursor-pointer duration-[0.5s]
                         peer peer-hover:text-yellow-400 hover:text-yellow-400
-                        "
+                    `}
+                        onClick={() => setStar(i)}
                       >
                         <IoIosStar size="22px" />
                       </span>
@@ -230,61 +579,131 @@ const ProductDetail = () => {
                   })}
                 </div>
                 <div className="w-[100%]">
-                  <form className="w-[100%] flex flex-col">
+                  <div className="w-[100%] flex flex-col">
                     <label className="text-[16px] font-[400] pb-[8px]">
                       Bình luận
                     </label>
                     <textarea
+                      onChange={(e) => setComment(e.target.value)}
                       className="p-[20px] rounded-[3px] outline-none border-[2px] border-gray-400"
                       placeholder="Nhập bình luận ở đây"
+                      value={comment}
                     />
                     <button
                       className="p-[16px] bg-black text-white uppercase text-[14px] font-[500]
                     duration-[0.5s] hover:bg-green-600 rounded-[3px] w-[14%] mt-[20px]"
+                      onClick={textRv ? editRv : addRv}
                     >
-                      Đăng bình luận
+                      {textRv ? "Sửa" : "Đăng"} bình luận
                     </button>
-                  </form>
+                  </div>
                 </div>
               </div>
               {/* sau khi dang binh luan */}
               <div className="w-[100%] mt-[30px] border-t-[2px] border-gray-200">
-                <div className="flex mt-[30px]">
-                  <span>
-                    <img
-                      src="https://htmldemo.net/pustok/pustok/image/icon/author-logo.png"
-                      className="w-[60px] rounded-[30px] "
-                    />
-                  </span>
-                  <div
-                    className="bg-white border-[2px] border-gray-200 rounded-[3px] p-[10px]
-                  before:content-[''] before:absolute relative before: ml-[20px] before:p-[6px]
-                  before:bg-white before:top-[10%] before:left-[-0.6%] before:rotate-[45deg]
-                  before:border-l-[2px] before:border-b-[2px] before:border-gray-200 w-[100%]
-                  "
-                  >
-                    <div className="flex">
-                      {stars.map((i, idx) => {
-                        return (
-                          <span key={idx} className="pr-[10px] ">
-                            <IoIosStar
-                              size="14px"
-                              className="text-yellow-400"
-                            />
-                          </span>
-                        );
-                      })}
-                    </div>
-                    <div className="flex text-[14px] font-[500] pt-[10px]">
-                      <span className="uppercase">Admin -</span>
-                      <span className="pl-[5px]">March 23, 2015</span>
-                    </div>
-                    <p>
-                      Lorem et placerat vestibulum, metus nisi posuere nisl, in
-                      accumsan elit odio quis mi
+                {reviewData.length === 0 ? (
+                  <>
+                    <p className="text-[17px] font-[500] text-center p-[13px]">
+                      Không có bình luận nào !
                     </p>
-                  </div>
-                </div>
+                  </>
+                ) : (
+                  <>
+                    {uiComment.map((i) => {
+                      return (
+                        <>
+                          <div className="flex mt-[30px]">
+                            <span>
+                              <img
+                                src={i?.userOther?.image || i?.user?.image}
+                                className="w-[60px] rounded-[30px] "
+                              />
+                            </span>
+                            <div
+                              className="bg-white border-[2px] border-gray-200 rounded-[3px] p-[10px]
+                    before:content-[''] before:absolute relative before: ml-[20px] before:p-[6px]
+                    before:bg-white before:top-[10%] before:left-[-0.6%] before:rotate-[45deg]
+                    before:border-l-[2px] before:border-b-[2px] before:border-gray-200 w-[100%]
+                    group
+                    "
+                            >
+                              <div className="flex flex-row-reverse justify-end">
+                                {stars.map((ix, idx) => {
+                                  return (
+                                    <span key={idx} className="pr-[10px] ">
+                                      <IoIosStar
+                                        size="14px"
+                                        className={`${
+                                          ix <= i.star ? "text-yellow-400" : ""
+                                        }  `}
+                                      />
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                              <div className="flex text-[14px] font-[500] pt-[10px]">
+                                <span className="uppercase">
+                                  {i?.user?.name || i?.userOther?.name} -
+                                </span>
+                                <span className="pl-[5px]">
+                                  {getRelativeTime(i.createDate)}
+                                </span>
+                                <span className="text-[13px] text-gray-400 font-[500] pl-[5px]">
+                                  {i.textEdit === ""
+                                    ? ""
+                                    : "- " + "( " + i.textEdit + " )"}
+                                </span>
+                              </div>
+                              <p>{i.comment}</p>
+                              {idUserOther === i?.userOther?._id ||
+                              idUser === i?.user?._id ? (
+                                <span
+                                  className=" absolute right-[1%] top-[50%] cursor-pointer
+                              group-hover:opacity-100
+                              duration-[0.5s] group-hover:visible opacity-0 invisible
+                              "
+                                  onClick={() => setOpenMenuRvs(i._id)}
+                                >
+                                  <FaEllipsisV size="14px" />
+                                </span>
+                              ) : (
+                                ""
+                              )}
+                              {/* menu edit, delete comment */}
+                              <div
+                                className={`${
+                                  i._id === idCm && openMenuRv
+                                    ? "opacity-100 visible z-[9999]"
+                                    : "opacity-0 invisible"
+                                } absolute border-[1px] right-[0] top-[67%]
+                              border-gray-300 bg-white rounded-[2px] duration-[0.5s] `}
+                              >
+                                <ul className="flex flex-col">
+                                  <li
+                                    className="cursor-pointer text-[15px] p-[17px] font-[500]
+                                  duration-[0.5s] hover:bg-gray-200"
+                                    onClick={() =>
+                                      setEditRv(i.comment, i.star, i._id)
+                                    }
+                                  >
+                                    Sửa
+                                  </li>
+                                  <li
+                                    className="p-[17px] cursor-pointer text-[15px] font-[500] 
+                                  duration-[0.5s] hover:bg-gray-200"
+                                    onClick={() => deleteComment(i._id)}
+                                  >
+                                    Xóa
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })}
+                  </>
+                )}
               </div>
             </div>
             {/* san pham lien quan */}

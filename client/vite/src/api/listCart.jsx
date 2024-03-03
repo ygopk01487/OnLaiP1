@@ -20,7 +20,8 @@ export const addCart = (
     totalPrice,
   });
 
-export const editCart = () => API.put("/listCart/editCart");
+export const editCart = (id, product, quantity, total, type) =>
+  API.put(`/listCart/editCart/${id}`, { product, quantity, total, type });
 
 export const deleteProCart = (id, product) =>
   API.put(`/listCart/deleteProCart/${id}`, { product });

@@ -1,4 +1,9 @@
-import { addCart, deleteProCart, getCartByUser } from "../api/listCart";
+import {
+  addCart,
+  deleteProCart,
+  editCart,
+  getCartByUser,
+} from "../api/listCart";
 
 export const getListCartByUser = async (userOther, user) => {
   try {
@@ -19,7 +24,6 @@ export const addListCart = async (
   totalPrice
 ) => {
   try {
-    console.log(user);
     const { data } = await addCart(
       user,
       userOther,
@@ -35,8 +39,10 @@ export const addListCart = async (
   }
 };
 
-export const editListCart = async (id, product) => {
+export const editListCart = async (id, product, quantity, total, type) => {
   try {
+    const { data } = await editCart(id, product, quantity, total, type);
+    return data;
   } catch (error) {
     console.log("edit list cart  fail");
   }

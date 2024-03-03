@@ -12,8 +12,6 @@ export const getOneUser = () => API.get(`/user/getOne`);
 export const checkEmails = ({ email }) =>
   API.post(`/user/checkEmail`, { email });
 
-export const refreshTokens = ({ refreshToken }) =>
-  API.post(`/user/token`, { token: refreshToken });
+export const refreshTokens = (token) => API.post(`/user/token`, { token });
 
-export const logOuts = ({ refreshTks }) =>
-  API.delete(`/user/logOut`, { token: refreshTks });
+export const logOuts = (token) => API.delete(`/user/logOut`, { token });
