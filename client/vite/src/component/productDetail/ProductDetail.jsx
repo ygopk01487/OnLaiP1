@@ -16,7 +16,13 @@ import { getByIdUserOther } from "../../action/usersOther";
 import { addListCart } from "../../action/listCart";
 import io from "socket.io-client";
 
-const socket = io.connect("http://localhost:5000");
+export const socket = io.connect("http://localhost:5000");
+
+export const numberFormat = new Intl.NumberFormat("de-DE", {
+  style: "currency",
+  currency: "VND",
+});
+
 import {
   addListLove,
   getByUserLove,
@@ -77,11 +83,6 @@ const ProductDetail = () => {
   //check open menu editCm
   const [check, setCheck] = useState("");
 
-  const numberFormat = new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency: "VND",
-  });
-
   const relativeTime = [
     { second: 1, name: "second", val: 60 },
     { second: 60, name: "minute", val: 60 },
@@ -93,13 +94,15 @@ const ProductDetail = () => {
 
   const getRelativeTime = (toDate) => {
     const realTime = new Intl.RelativeTimeFormat(undefined, { style: "long" });
-    const seconds = Math.floor((new Date(toDate) - new Date()) / 1000);
+
+    const seconds = Math.floor((new Date() - new Date(toDate)) / 1000);
 
     for (let i = 0; i < relativeTime.length; i++) {
       const { second, name, val } = relativeTime[i];
       const duration = Math.abs(seconds) / second;
+
       if (Math.abs(duration) < val || i === relativeTime.length - 1) {
-        return realTime.format(Math.floor(seconds / second), name);
+        return realTime.format(-Math.floor(seconds / second), name);
       }
     }
   };
@@ -168,7 +171,9 @@ const ProductDetail = () => {
     }
 
     if (datas) {
+      setNumberPro(1);
       alert("thêm vào giỏ hàng thành công");
+      socket.emit("loadCart", data._id);
     } else {
       alert("thêm vào giỏ hành thất bại");
     }
@@ -303,7 +308,8 @@ const ProductDetail = () => {
   //get review by id
   const getRvById = async () => {
     const data = await getReviewById(product._id);
-    if (data) {
+    if (data.reviews !== null) {
+      console.log("hello");
       setReviewData(data.reviews.review);
       setIdRv(data.reviews._id);
       setNumberStar(data.numberStar);
@@ -353,7 +359,13 @@ const ProductDetail = () => {
     socket.on("new_comment", (data) => {
       setReviewDataRealTime(data);
     });
-  }, []);
+  }, [socket]);
+
+  useEffect(() => {
+    if (reviewDataRealTime.length > 0) {
+      getRvById();
+    }
+  }, [reviewDataRealTime.length]);
 
   let uiComment =
     reviewDataRealTime.length > 0 ? reviewDataRealTime : reviewData;
@@ -439,27 +451,29 @@ const ProductDetail = () => {
                       {numberFormat.format(product.price)}
                     </del>
                   </div>
-                  <div className="flex mt-[10px] pb-[10px]">
-                    {stars.map((i, idx) => {
-                      return (
-                        <span className="" key={idx}>
-                          <IoIosStar
-                            size="22px"
-                            className={`${
-                              i <= numberStar ? "text-yellow-400 " : ""
-                            }  rounded-[2px] pr-[2px]`}
-                          />
-                        </span>
-                      );
-                    })}
+                  <div className="flex mt-[10px] pb-[10px] ">
+                    <div className="flex justify-end flex-row-reverse">
+                      {stars.map((i, idx) => {
+                        return (
+                          <span className="" key={idx}>
+                            <IoIosStar
+                              size="22px"
+                              className={`${
+                                i <= numberStar ? "text-yellow-400 " : ""
+                              }  rounded-[2px] pr-[2px]`}
+                            />
+                          </span>
+                        );
+                      })}
+                    </div>
                     <span
                       className="text-[15px] font-[400] border-r-[2px] border-gray-300 pl-[8px] pr-[8px]
                     "
                     >
-                      ({reviewData.length} đánh giá)
+                      ({uiComment.length || 0} đánh giá)
                     </span>
                     <span
-                      className="cursor-pointer text-[15px] font-[400] pl-[8px]"
+                      className="cursor-pointer text-[15px] font-[400] pl-[8px] duration-[0.5s] hover:text-green-600"
                       onClick={activeF}
                     >
                       Viết đánh giá
@@ -473,7 +487,7 @@ const ProductDetail = () => {
                   <div className="flex items-center pb-[10px]">
                     <span
                       className={`icon-add-remove-carts ${
-                        numberPro >= 1
+                        numberPro <= 1
                           ? "pointer-events-none"
                           : "pointer-events-auto"
                       } `}
@@ -601,7 +615,7 @@ const ProductDetail = () => {
               </div>
               {/* sau khi dang binh luan */}
               <div className="w-[100%] mt-[30px] border-t-[2px] border-gray-200">
-                {reviewData.length === 0 ? (
+                {uiComment.length === 0 ? (
                   <>
                     <p className="text-[17px] font-[500] text-center p-[13px]">
                       Không có bình luận nào !
@@ -646,7 +660,7 @@ const ProductDetail = () => {
                                   {i?.user?.name || i?.userOther?.name} -
                                 </span>
                                 <span className="pl-[5px]">
-                                  {getRelativeTime(i.createDate)}
+                                  {getRelativeTime(i.createDate.toString())}
                                 </span>
                                 <span className="text-[13px] text-gray-400 font-[500] pl-[5px]">
                                   {i.textEdit === ""

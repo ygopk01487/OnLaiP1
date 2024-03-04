@@ -17,24 +17,58 @@ import ProductsDash from "./component/dashboard/productsDash/ProductsDash";
 import AccountDetail from "./component/accountDetail/AccountDetail";
 
 function App() {
+  const [checkLogin, setCheckLogin] = useState(
+    "" || window.sessionStorage.getItem("lg")
+  );
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/dang-nhap" />} />
+        <Route
+          path="/"
+          element={
+            !checkLogin ? (
+              <Navigate to="/dang-nhap" />
+            ) : (
+              <Navigate to="/trang-chu" />
+            )
+          }
+        />
         <Route path="/dang-nhap" element={<SingIn />} />
         <Route path="/dang-ky-tai-khoan" element={<SignUpOne />} />
         <Route path="/xac-minh" element={<Otp />} />
         <Route path="/dang-ky-mat-khau" element={<SingUpTwo />} />
         <Route path="/doi-mat-khau" element={<SingUpTwo />} />
         <Route path="/quen-mat-khau" element={<ForgetPass />} />
-        <Route path="/trang-chu" element={<Home />} />
-        <Route path="/danh-sach-yeu-thich" element={<ListLove />} />
-        <Route path="/gio-hang" element={<Carts />} />
-        <Route path="/thu-tuc-dat-hang" element={<CheckOut />} />
-        <Route path="/san-pham-chi-tiet" element={<ProductDetail />} />
-        <Route path="/trang-chu-admin" element={<HomeDash />} />
-        <Route path="/bang-san-pham" element={<ProductsDash />} />
-        <Route path="/tai-khoan-cua-toi" element={<AccountDetail />} />
+        <Route
+          path="/trang-chu"
+          element={checkLogin ? <Home /> : <Navigate to="/dang-nhap" />}
+        />
+        <Route
+          path="/danh-sach-yeu-thich"
+          element={checkLogin ? <ListLove /> : <Navigate to="/dang-nhap" />}
+        />
+        <Route
+          path="/gio-hang"
+          element={checkLogin ? <Carts /> : <Navigate to="/dang-nhap" />}
+        />
+        <Route
+          path="/thu-tuc-dat-hang"
+          element={checkLogin ? <CheckOut /> : <Navigate to="/dang-nhap" />}
+        />
+        <Route
+          path="/san-pham-chi-tiet"
+          element={
+            checkLogin ? <ProductDetail /> : <Navigate to="/dang-nhap" />
+          }
+        />
+        {/* <Route path="/trang-chu-admin" element={<HomeDash />} />
+        <Route path="/bang-san-pham" element={<ProductsDash />} /> */}
+        <Route
+          path="/tai-khoan-cua-toi"
+          element={
+            checkLogin ? <AccountDetail /> : <Navigate to="/dang-nhap" />
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

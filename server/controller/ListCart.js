@@ -219,7 +219,7 @@ const editCart = async (req, res) => {
 
     res
       .status(200)
-      .json({ success: true, udpateCart: data, message: "update cart true" });
+      .json({ success: true, updateCart: data, message: "update cart true" });
   } catch (error) {
     return res.status(404).json({ success: false, message: "edit  cart fail" });
   }

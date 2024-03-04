@@ -15,6 +15,7 @@ import { getByIdUserOther } from "../../action/usersOther";
 import { getByUser, refreshTK } from "../../action/users";
 import { useNavigate } from "react-router-dom";
 import LoadingProducts from "../loading/loadingProducts";
+import { numberFormat, socket } from "../productDetail/ProductDetail";
 
 const Carts = () => {
   const [dataCart, setDataCart] = useState([]);
@@ -83,11 +84,12 @@ const Carts = () => {
 
   //edit cart
   const editListCarts = async (product, quantity, total, type) => {
-    setQuantityPro(quantityPro + 1);
+    // setQuantityPro(quantityPro + 1);
     const data = await editListCart(idCart, product, quantity, total, type);
     if (data) {
       getByUserCarts();
       alert("sua thanh cong");
+      socket.emit("loadCart", type);
     } else {
       alert("sua that bai");
     }
@@ -99,6 +101,7 @@ const Carts = () => {
     if (data) {
       getByUserCarts();
       alert("xoa thanh cong");
+      socket.emit("loadCart", data._id);
     } else {
       alert("xoa that bai");
     }
@@ -165,7 +168,17 @@ const Carts = () => {
                           className="duration-[0.5s] hover:bg-white"
                         >
                           <td className="cursor-pointer">
-                            <span className="flex justify-center border-tbody-listLove p-3">
+                            <span
+                              className="flex justify-center border-tbody-listLove p-3"
+                              onClick={() =>
+                                navigate(
+                                  `/san-pham-chi-tiet?name=${i.productId.name}`,
+                                  {
+                                    state: { id: i.productId._id },
+                                  }
+                                )
+                              }
+                            >
                               <img
                                 src={i.productId.image}
                                 className="w-[100px]"
@@ -179,10 +192,11 @@ const Carts = () => {
                           </td>
                           <td className="border-tbody-listLove p-3">
                             <span className="text-[16px] font-[400] flex items-center justify-center">
-                              {(i.productId.price *
-                                (100 - i.productId.discount)) /
-                                100}
-                              đ
+                              {numberFormat.format(
+                                (i.productId.price *
+                                  (100 - i.productId.discount)) /
+                                  100
+                              )}
                             </span>
                           </td>
                           <td className="border-tbody-listLove p-3">
@@ -228,11 +242,12 @@ const Carts = () => {
                           </td>
                           <td className="border-tbody-listLove p-3">
                             <span className="text-[16px] font-[400] flex items-center justify-center">
-                              {i.quantity *
-                                ((i.productId.price *
-                                  (100 - i.productId.discount)) /
-                                  100)}
-                              đ
+                              {numberFormat.format(
+                                i.quantity *
+                                  ((i.productId.price *
+                                    (100 - i.productId.discount)) /
+                                    100)
+                              )}
                             </span>
                           </td>
                           <td className="border-tbody-listLove p-3">
@@ -286,20 +301,20 @@ const Carts = () => {
                 <div className="flex justify-between pb-[10px]">
                   <span className="text-[15px] font-[400]">Tổng tiền</span>
                   <span className="text-green-600 font-[500] text-[16px]">
-                    {totalCart} đ
+                    {numberFormat.format(totalCart)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[15px] font-[400]">Giá vận chuyển</span>
                   <span className="text-green-600 font-[500] text-[16px]">
-                    0 đ
+                    {numberFormat.format(0)}
                   </span>
                 </div>
               </div>
               <div className="p-[10px] flex justify-between">
                 <span className="text-[18px]">Tổng tất cả tiền</span>
                 <span className="text-green-600 font-[500] text-[18px]">
-                  {totalCart} đ
+                  {numberFormat.format(totalCart)}
                 </span>
               </div>
             </div>

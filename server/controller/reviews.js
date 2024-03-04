@@ -37,6 +37,15 @@ const getByIdPro = async (req, res) => {
       .populate("review.userOther")
       .populate("product");
 
+    if (!data) {
+      return res.status(202).json({
+        success: true,
+        reviews: data,
+        numberStar: 0,
+        message: "comment length = 0",
+      });
+    }
+
     //get star length max comment
     let datas = data.review.map((i) => i.star);
 
@@ -46,7 +55,7 @@ const getByIdPro = async (req, res) => {
     }
 
     for (let i = 0; i < 5; i++) {
-      if (starMaxs[i] > starMax) {
+      if (starMaxs[i] >= starCm) {
         starCm = starMaxs[i];
         starMax = i + 1;
       }
@@ -89,6 +98,7 @@ const addReviews = async (req, res) => {
           userOther,
           star,
           comment,
+          createDate: new Date(),
         },
       });
 
@@ -113,6 +123,7 @@ const addReviews = async (req, res) => {
             userOther,
             star,
             comment,
+            createDate: new Date(),
           },
         },
       })

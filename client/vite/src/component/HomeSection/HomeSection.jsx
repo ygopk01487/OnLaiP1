@@ -17,6 +17,7 @@ import Toast from "../toast/Toast";
 import { closeToast, showToast } from "../toast/ShowToast";
 import { getByUser, refreshTK } from "../../action/users";
 import { addListCart } from "../../action/listCart";
+import { numberFormat, socket } from "../productDetail/ProductDetail";
 
 const HomeSection = () => {
   const [openShow, setOpenShow] = useState(false);
@@ -68,6 +69,8 @@ const HomeSection = () => {
 
   const [listLove, setListLove] = useState([]);
 
+  const [countAddCart, setCountAddCart] = useState(0);
+
   // const [loadToast, setLoadToast] = useState(false);
   // const [checkToast, setCheckToast] = useState(false);
   // const [mess, setMess] = useState("");
@@ -81,10 +84,14 @@ const HomeSection = () => {
 
     const data = await getAllProducts(number, sort, name, pageSs);
 
-    setTotalPage(data.totalPage);
-    setProducts(data.products);
+    if (data) {
+      setTotalPage(data.totalPage);
+      setProducts(data.products);
+      setOpenShow(false);
+      setOpenSort(false);
 
-    setLoadingProducts(false);
+      setLoadingProducts(false);
+    }
   };
 
   for (let i = 1; i <= totalPage; i++) {
@@ -125,8 +132,6 @@ const HomeSection = () => {
 
   //add list love
   const addListLoves = async (idProduct) => {
-    setLoadingProducts(true);
-
     //get userOne
     const userOther = JSON.parse(window.sessionStorage.getItem("user"));
     let user;
@@ -147,7 +152,7 @@ const HomeSection = () => {
 
     if (data) {
       getListUserLove();
-      setLoadingProducts(false);
+      alert("Thêm vào danh sách yêu thích thành công");
     } else {
       alert("thêm vào danh sách yêu thích thất bại");
     }
@@ -155,7 +160,6 @@ const HomeSection = () => {
 
   //delete love
   const deleteLove = async (idProduct) => {
-    setLoadingProducts(true);
     const userOther = JSON.parse(window.sessionStorage.getItem("user"));
     let user;
     if (!userOther) {
@@ -180,9 +184,9 @@ const HomeSection = () => {
         const data = await removeProLove(idUser._id, idProduct);
         if (data) {
           getListUserLove();
-          setLoadingProducts(false);
+          alert("xóa sản phẩm khỏi danh sách yêu thích thành công");
         } else {
-          alert("xóa vào danh sách yêu thích thất bại");
+          alert("xóa sản phẩm khỏi danh sách yêu thích thất bại");
         }
       }
     }
@@ -249,7 +253,8 @@ const HomeSection = () => {
 
     if (data) {
       alert("them vao gio hang thanh cong");
-      // window.location.reload();
+      setCountAddCart(countAddCart + 1);
+      socket.emit("loadCart", countAddCart);
     } else {
       alert("them vao gio hang that bai");
     }
@@ -448,10 +453,12 @@ const HomeSection = () => {
                       </span>
                       <div className="flex justify-center items-center">
                         <span className="text-[17px] text-green-600 font-[500] pr-[6px]">
-                          {(product.price * (100 - product.discount)) / 100}đ
+                          {numberFormat.format(
+                            (product.price * (100 - product.discount)) / 100
+                          )}
                         </span>
                         <span className="text-gray-400 text-[14px] pr-[6px]">
-                          {product.price}đ
+                          {numberFormat.format(product.price)}
                         </span>
                         <span
                           className="p-1 bg-red-600 text-white text-[15px] font-[650]

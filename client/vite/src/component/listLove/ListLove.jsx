@@ -19,6 +19,8 @@ const ListLove = () => {
 
   const [loadingPro, setLoadingPro] = useState(false);
 
+  const navigate = useNavigate();
+
   //ham
   const getUserListLove = async () => {
     setLoadingPro(true);
@@ -138,7 +140,16 @@ const ListLove = () => {
                               className="duration-[0.5s] hover:bg-white"
                             >
                               <td className="img-tbody-listLove cursor-pointer border-tbody-listLove p-3">
-                                <span>
+                                <span
+                                  onClick={() =>
+                                    navigate(
+                                      `/san-pham-chi-tiet?name=${i.name}`,
+                                      {
+                                        state: { id: i._id },
+                                      }
+                                    )
+                                  }
+                                >
                                   <img src={i.image} className="w-[100px]" />
                                 </span>
                               </td>

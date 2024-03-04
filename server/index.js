@@ -43,6 +43,10 @@ io.on("connection", (socket) => {
   socket.on("comment", (data) => {
     io.emit("new_comment", data);
   });
+
+  socket.on("loadCart", (data) => {
+    io.emit("load", data);
+  });
 });
 
 server.listen(PORT, (req, res) => {

@@ -14,6 +14,7 @@ import { Cookies } from "react-cookie";
 import { getByUser, logOUT, refreshTK } from "../../action/users";
 import { getByIdUserOther } from "../../action/usersOther";
 import { deleteListProCart, getListCartByUser } from "../../action/listCart";
+import { numberFormat, socket } from "../productDetail/ProductDetail";
 
 const Menu = ({ test }) => {
   const [openMenuU, setOpenMenuU] = useState(false);
@@ -44,6 +45,8 @@ const Menu = ({ test }) => {
 
   const [idUser, setIdUser] = useState("");
   const [lengthCart, setLengthCart] = useState(0);
+
+  const [loadCart, setLoadCart] = useState("");
 
   // ham
   const openMenuUser = () => {
@@ -155,11 +158,14 @@ const Menu = ({ test }) => {
     if (idUserOther || idUser) {
       getByUserCarts();
     }
-  }, [idUserOther, idUser]);
+  }, [idUserOther, idUser, loadCart]);
 
-  // useEffect(() => {
-  //   console.log("hello");
-  // }, [test]);
+  useEffect(() => {
+    socket.on("load", (data) => {
+      setLoadCart(data);
+    });
+  }, [socket]);
+
   // console.log(test);
 
   return (
@@ -282,7 +288,7 @@ const Menu = ({ test }) => {
         <div className="p-2">
           <h4 className="text-black text-[22px]">Giỏ hàng</h4>
           <p className="flex text-green-600 font-bold text-[16px] items-center">
-            {totalCart || 0} đ
+            {numberFormat.format(totalCart || 0)}
             <span className="text-black pl-[10px]">
               <FaChevronDown size="12px" />
             </span>
@@ -341,10 +347,11 @@ const Menu = ({ test }) => {
                         <span>
                           {i.quantity} x
                           <span className="text-[20px] text-green-600 font-bold pl-[5px]">
-                            {(i.productId.price *
-                              (100 - i.productId.discount)) /
-                              100}
-                            đ
+                            {numberFormat.format(
+                              (i.productId.price *
+                                (100 - i.productId.discount)) /
+                                100
+                            )}
                           </span>
                         </span>
                       </div>
