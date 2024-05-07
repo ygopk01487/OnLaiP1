@@ -76,6 +76,7 @@ const SignUpOne = () => {
         setShowToasts(true);
         setMess(emailExist.message);
         setCheckToast(false);
+        setUser({ ...user, name: "", email: "" });
       } else {
         await sendMailss({ email: user.email });
         if (localStorage.getItem("counts")) {
@@ -84,8 +85,8 @@ const SignUpOne = () => {
         localStorage.setItem("counts", 2);
         await goToOTP();
       }
-      loadingPage();
     }
+    loadingPage();
   };
 
   //vali form
@@ -99,7 +100,7 @@ const SignUpOne = () => {
       setTextName("Tên không được bỏ trống");
       nameV = true;
     } else if (user.name.trim().length < 5) {
-      setTextName({ ...validateForm, name: "Tên quá ngắn" });
+      setTextName("Tên quá ngắn");
       nameV = true;
     }
 

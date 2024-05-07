@@ -56,6 +56,16 @@ const Otp = () => {
     }
   };
 
+  //deleteOTP
+  const deleteOTP = async () => {
+    const id = await getOneUserOtp(
+      user.url === "/quen-mat-khau" ? user.email.email : user.email
+    );
+
+    const mess = await deleteOtp(id);
+    return mess;
+  };
+
   const checkOTP = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -71,10 +81,8 @@ const Otp = () => {
         setCount(count - 1);
         setMess(`Nhập sai quá ${count} lần. Mã sẽ hết hạn !`);
       } else if (count === 0) {
-        const id = await getOneUserOtp({
-          email: user.url === "/quen-mat-khau" ? user.email.email : user.email,
-        });
-        const mess = await deleteOtp({ id });
+        deleteOTP();
+
         if (mess) {
           setCount(0);
           localStorage.setItem("counts", count);
@@ -83,8 +91,10 @@ const Otp = () => {
       }
     } else {
       if (user.url === "/quen-mat-khau") {
+        deleteOTP()
         navigate("/doi-mat-khau", { state: user.email.email });
       } else {
+        deleteOTP()
         navigate("/dang-ky-mat-khau", { state: datas });
       }
     }
@@ -97,7 +107,7 @@ const Otp = () => {
     setShowToasts(true);
     setCheckToast(true);
     setMess("Vui lòng vào mail để nhận mã");
-    localStorage.setItem("counts", 5);
+    localStorage.setItem("counts", 2);
     setCheckCount(true);
     clearInputOPT();
     loadingPage();
@@ -115,7 +125,7 @@ const Otp = () => {
         setTimeout(() => {
           closeToast();
           if (checkCount === true) {
-            localStorage.setItem("counts", 5);
+            localStorage.setItem("counts", 2);
             setCount(localStorage.getItem("counts"));
             setCheckCount(false);
           } else {
@@ -144,7 +154,7 @@ const Otp = () => {
   }, []);
   return (
     <>
-      <Toast mess={mess} checkToast={checkToast} />
+      <Toast mess={mess} checkToast={checkToast} style="top-[10%]" />
       {loading ? (
         <Loading />
       ) : (

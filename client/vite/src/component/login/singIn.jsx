@@ -64,6 +64,7 @@ const SingIn = () => {
         window.sessionStorage.setItem("lg", "Login");
         navigate("/trang-chu", { state: { login } });
         alert("Thanh cong");
+        window.location.reload();
       } else {
         setCheckToast(false);
         setShowToasts(true);

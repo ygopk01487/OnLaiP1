@@ -58,6 +58,7 @@ const ForgetPass = () => {
   const handleChange = (e) => {
     setEmail({ ...email, [e.target.name]: e.target.value });
   };
+  console.log(email);
 
   const toBackSignIn = () => navigate("/dang-nhap");
 

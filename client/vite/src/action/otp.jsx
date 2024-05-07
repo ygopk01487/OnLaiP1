@@ -9,18 +9,18 @@ export const checkOtp = async ({ otp, email }) => {
   }
 };
 
-export const getOneUserOtp = async ({ id }) => {
+export const getOneUserOtp = async (email) => {
   try {
-    const { data } = await getOneUserOTP({ id });
-    return data.data.id;
+    const { data } = await getOneUserOTP(email);
+    return data.data._id;
   } catch (error) {
     console.log("get one user otp  fail");
   }
 };
 
-export const deleteOtp = async ({ email }) => {
+export const deleteOtp = async (id) => {
   try {
-    const { data } = await deleteOTP({ email });
+    const { data } = await deleteOTP(id);
     return data.message;
   } catch (error) {
     console.log("delete otp  fail");

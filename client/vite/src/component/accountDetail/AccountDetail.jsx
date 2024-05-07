@@ -1,12 +1,81 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Menu from "../nvabar/menu";
 import Footer from "../footer/Footer";
 import { MdOutlineNavigateNext } from "react-icons/md";
-import { MdLogout } from "react-icons/md";
-import { FaUser } from "react-icons/fa";
-import { RiBillFill } from "react-icons/ri";
+import MenuAccountDetail from "./menuAccountDetail";
+import { useLocation } from "react-router-dom";
+import { getByUser } from "../../action/users";
+import { getByIdUserOther } from "../../action/usersOther";
 
 const AccountDetail = () => {
+  const location = useLocation();
+
+  const { localId } = location.state;
+
+  const [dataUser, setDataUser] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    image: "",
+  });
+
+  //function
+  //rf token
+  const fcRefreshToken = async () => {
+    const rfTK = JSON.parse(window.sessionStorage.getItem("refresh_token"));
+
+    if (rfTK) {
+      const token = await refreshTK(rfTK);
+      if (token) {
+        window.sessionStorage.setItem("access_token", JSON.stringify(token));
+      }
+    }
+  };
+
+  //get user detail
+
+  const getUserDetails = async () => {
+    let data;
+
+    const checkUserOther = JSON.parse(window.sessionStorage.getItem("user"));
+
+    if (!checkUserOther) {
+      data = await getByUser();
+      if (data) {
+        setDataUser({
+          ...dataUser,
+          firstName: data.name.split(" ")[0],
+          lastName: data.name.split(" ")[data.name.split(" ").length - 1],
+          email: data.email,
+          image: data.image,
+        });
+      }
+    } else {
+      data = await getByIdUserOther(localId);
+      if (data) {
+        setDataUser({
+          ...dataUser,
+          firstName: data.name.split(" ")[0],
+          lastName: data.name.split(" ")[data.name.split(" ").length - 1],
+          email: data.email,
+          image: data.image,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    const userOther = JSON.parse(window.sessionStorage.getItem("user"));
+
+    if (!userOther) {
+      setInterval(() => {
+        fcRefreshToken();
+      }, 10000);
+    }
+
+    getUserDetails();
+  }, []);
+
   return (
     <div className="w-[100%]">
       <div className="w-[1200px] m-auto">
@@ -27,31 +96,7 @@ const AccountDetail = () => {
           {/* than */}
           <div className="w-[100%] mt-[30px] flex justify-between">
             {/* menu */}
-            <div className="w-[20%]">
-              <ul>
-                <li
-                  className="menu-my-account active
-                "
-                >
-                  <span className="pr-[8px]">
-                    <FaUser size="14px" />
-                  </span>
-                  <span className="">Thông tin tài khoản</span>
-                </li>
-                <li className="menu-my-account">
-                  <span className="pr-[8px]">
-                    <RiBillFill size="14px" />
-                  </span>
-                  <span>Hóa đơn</span>
-                </li>
-                <li className="menu-my-account">
-                  <span className="pr-[8px]">
-                    <MdLogout size="14px" />
-                  </span>
-                  <span>Đăng xuất</span>
-                </li>
-              </ul>
-            </div>
+            <MenuAccountDetail />
             {/* giao dien */}
             <div className="w-[70%] pb-[3%] border-[2px] border-gray-200 rounded-[3px]">
               <div className="p-[20px]">
@@ -70,20 +115,23 @@ const AccountDetail = () => {
                         className="input-my-account
                     "
                         type="text"
-                        placeholder="Họ"
+                        value={dataUser.firstName}
+                        disabled="disabled"
                       />
                       <input
                         className="input-my-account"
                         type="text"
-                        placeholder="Tên"
+                        value={dataUser.lastName}
+                        disabled="disabled"
                       />
                     </div>
                     <input
                       className="input-my-account"
                       type="text"
-                      placeholder="Email"
+                      value={dataUser.email}
+                      disabled="disabled"
                     />
-                    <h3
+                    {/* <h3
                       className=" p-[10px]
                 text-[18px] font-[400] mb-[10px]"
                     >
@@ -93,26 +141,24 @@ const AccountDetail = () => {
                       className="input-my-account"
                       type="password"
                       placeholder="Mật khẩu"
-                    />
+                    /> */}
                     <button
                       className="p-[10px] w-[24%] bg-green-600 text-white duration-[0.5s]
-                    uppercase rounded-[3px] mt-[10px] text-[13px] font-[500] hover:bg-black"
+                    uppercase rounded-[3px] mt-[10px] text-[13px] font-[500] hover:bg-black pointer-events-none"
                     >
                       Lưu
                     </button>
                   </div>
                   <div className="w-[100%] ml-[200px]">
                     <span>
-                      <img
-                        className="w-[100px]"
-                        src="https://media.istockphoto.com/id/1298261537/vi/vec-to/ch%E1%BB%97-d%C3%A0nh-s%E1%BA%B5n-cho-bi%E1%BB%83u-t%C6%B0%E1%BB%A3ng-%C4%91%E1%BA%A7u-h%E1%BB%93-s%C6%A1-ng%C6%B0%E1%BB%9Di-%C4%91%C3%A0n-%C3%B4ng-tr%E1%BB%91ng.jpg?s=612x612&w=0&k=20&c=Rbi2tNjNA4z86gzSPBhGOefKI-XTKqlqGy-kiPoUvRA="
-                      />
+                      <img className="w-[100px]" src={dataUser.image} />
                     </span>
                     <input
                       type="file"
                       className="file:rounded-[20px] file:border-[0px] file:p-[9px] file:bg-green-600
                       file:text-white file:w-[40%] file:cursor-pointer file:text-[14px] file:font-[500] file:mt-[20px]
                       file:duration-[0.5s] hover:file:bg-black"
+                      disabled="disabled"
                     />
                   </div>
                 </form>

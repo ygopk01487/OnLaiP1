@@ -16,7 +16,7 @@ import { getByIdUserOther } from "../../action/usersOther";
 import { deleteListProCart, getListCartByUser } from "../../action/listCart";
 import { numberFormat, socket } from "../productDetail/ProductDetail";
 
-const Menu = ({ test }) => {
+const Menu = () => {
   const [openMenuU, setOpenMenuU] = useState(false);
   const [openCartMini, setOpenCartMini] = useState(false);
   const [search, setSearch] = useState(
@@ -95,7 +95,14 @@ const Menu = ({ test }) => {
     window.sessionStorage.removeItem("refresh_token");
     window.sessionStorage.removeItem("lg");
     window.sessionStorage.removeItem("access_token");
+    window.localStorage.removeItem("nameSort");
+    window.localStorage.removeItem("numberPage");
+    window.localStorage.removeItem("search");
+    window.localStorage.removeItem("pageSize");
+    window.sessionStorage.removeItem("counts");
+    window.sessionStorage.removeItem("active");
     navigate("/dang-nhap");
+    window.location.reload();
   };
 
   //user other
@@ -133,9 +140,16 @@ const Menu = ({ test }) => {
     if (data) {
       getByUserCarts();
       alert("xoa thanh cong");
+      socket.emit("loadCart", data);
     } else {
       alert("xoa that bai");
     }
+  };
+
+  //active menu
+  const getAccount = (name) => {
+    navigate("/tai-khoan-cua-toi", { state: { localId: user.localId } }),
+      JSON.stringify(window.localStorage.setItem("active", name));
   };
 
   useEffect(() => {
@@ -165,8 +179,6 @@ const Menu = ({ test }) => {
       setLoadCart(data);
     });
   }, [socket]);
-
-  // console.log(test);
 
   return (
     <div className="w-[100%] p-1 h-[100px] flex" id="menu">
@@ -236,6 +248,7 @@ const Menu = ({ test }) => {
               <span
                 className="text-[13px] font-bold border-gray-200 border-b-[2px] pb-[10px]
                 "
+                onClick={() => getAccount("tai-khoan-cua-toi")}
               >
                 Thông tin tài khoản
               </span>
@@ -302,7 +315,7 @@ const Menu = ({ test }) => {
         </span>
         {/* gio hang mini */}
         <div
-          className={`${
+          className={`w-[auto] ${
             openCartMini
               ? " bg-white visible opacity-100 animate-menuMiniTop"
               : "invisible opacity-0 animate-menuMiniDown duration-[0.5s]"
@@ -325,7 +338,7 @@ const Menu = ({ test }) => {
               {dataCarts.map((i) => {
                 return (
                   <div
-                    className="flex p-6 pb-[10px] border-b-[2px]  border-gray-200"
+                    className="flex items-center p-6 pb-[10px] border-b-[2px]  border-gray-200"
                     key={i.productId._id}
                   >
                     <span>
@@ -368,32 +381,32 @@ const Menu = ({ test }) => {
                   </div>
                 );
               })}
-            </>
-          )}
-          {/* xem gio va dat hang */}
-          <div className="flex justify-center p-4">
-            <span
-              className="flex items-center justify-center font-bold pr-[10%]
+              {/* xem gio va dat hang */}
+              <div className="flex justify-center p-4 w-[auto]">
+                <span
+                  className="flex items-center justify-center font-bold pr-[10%]
             hover:text-green-600 duration-[0.5s]"
-              onClick={() => nagivate("/gio-hang")}
-            >
-              Xem giỏ hàng
-              <span>
-                <MdNavigateNext size="24px" />
-              </span>
-            </span>
-            <span
-              className="p-3 w-[140px] flex items-center justify-center
+                  onClick={() => nagivate("/gio-hang")}
+                >
+                  Xem giỏ hàng
+                  <span>
+                    <MdNavigateNext size="24px" />
+                  </span>
+                </span>
+                <span
+                  className="p-3 w-[140px] flex items-center justify-center
               bg-green-600 text-white text-[16px] font-medium rounded-[5px]
             hover:bg-black duration-[0.5s]"
-              onClick={() => nagivate("/thu-tuc-dat-hang")}
-            >
-              Đặt mua
-              <span>
-                <MdNavigateNext size="24px" />
-              </span>
-            </span>
-          </div>
+                  onClick={() => nagivate("/thu-tuc-dat-hang")}
+                >
+                  Đặt mua
+                  <span>
+                    <MdNavigateNext size="24px" />
+                  </span>
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

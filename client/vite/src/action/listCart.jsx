@@ -1,5 +1,8 @@
 import {
   addCart,
+  addSaleCart,
+  deleteALlProCarts,
+  deleteCarts,
   deleteProCart,
   editCart,
   getCartByUser,
@@ -42,7 +45,7 @@ export const addListCart = async (
 export const editListCart = async (id, product, quantity, total, type) => {
   try {
     const { data } = await editCart(id, product, quantity, total, type);
-    return data;
+    return data.updateCart;
   } catch (error) {
     console.log("edit list cart  fail");
   }
@@ -54,5 +57,31 @@ export const deleteListProCart = async (id, product) => {
     return data.deleteListProCart;
   } catch (error) {
     console.log("delete list pro cart fail");
+  }
+};
+
+export const deleteAllProCartss = async (id) => {
+  try {
+    const { data } = await deleteALlProCarts(id);
+    return data.data;
+  } catch (error) {
+    console.log("delete cart fail");
+  }
+};
+
+export const deleteCartss = async (id) => {
+  try {
+    await deleteCarts(id);
+  } catch (error) {
+    console.log("delete cart fail");
+  }
+};
+
+export const addSaleCarts = async (nameSale, value, id) => {
+  try {
+    const { data } = await addSaleCart(nameSale, value, id);
+    return data.data;
+  } catch (error) {
+    console.log("add sale fail");
   }
 };

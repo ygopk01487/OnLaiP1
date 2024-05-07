@@ -5,7 +5,7 @@ import SingUpTwo from "./component/login/singUpTwo";
 import Otp from "./component/otp/Otp";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ForgetPass from "./component/login/forgetPass";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Home from "./component/Home/Home";
 import Loading from "./component/loading/Loading";
 import ListLove from "./component/listLove/ListLove";
@@ -15,25 +15,29 @@ import ProductDetail from "./component/productDetail/ProductDetail";
 import HomeDash from "./component/dashboard/home/homeDash";
 import ProductsDash from "./component/dashboard/productsDash/ProductsDash";
 import AccountDetail from "./component/accountDetail/AccountDetail";
+import ProtectRouters from "./component/protectRouters/protectRouters";
+import OrderProducts from "./component/orderProducts/orderProducts";
+import OrderComplete from "./component/orderComplete/orderComplete";
 
 function App() {
   const [checkLogin, setCheckLogin] = useState(
     "" || window.sessionStorage.getItem("lg")
   );
+
+  useEffect(() => {
+    setCheckLogin(window.sessionStorage.getItem("lg"));
+  }, [window.location.pathname]);
+
   return (
     <BrowserRouter>
+      {/* <ProtectRouters> */}
       <Routes>
         <Route
-          path="/"
-          element={
-            !checkLogin ? (
-              <Navigate to="/dang-nhap" />
-            ) : (
-              <Navigate to="/trang-chu" />
-            )
-          }
+          exact
+          path="/dang-nhap"
+          element={!checkLogin ? <SingIn /> : <Navigate to="/" />}
         />
-        <Route path="/dang-nhap" element={<SingIn />} />
+        <Route path="/" element={<Navigate to="/trang-chu" />} />
         <Route path="/dang-ky-tai-khoan" element={<SignUpOne />} />
         <Route path="/xac-minh" element={<Otp />} />
         <Route path="/dang-ky-mat-khau" element={<SingUpTwo />} />
@@ -47,10 +51,7 @@ function App() {
           path="/danh-sach-yeu-thich"
           element={checkLogin ? <ListLove /> : <Navigate to="/dang-nhap" />}
         />
-        <Route
-          path="/gio-hang"
-          element={checkLogin ? <Carts /> : <Navigate to="/dang-nhap" />}
-        />
+        <Route path="/gio-hang" element={<Carts />} />
         <Route
           path="/thu-tuc-dat-hang"
           element={checkLogin ? <CheckOut /> : <Navigate to="/dang-nhap" />}
@@ -69,7 +70,20 @@ function App() {
             checkLogin ? <AccountDetail /> : <Navigate to="/dang-nhap" />
           }
         />
+        <Route
+          path="/danh-sach-dat-hang"
+          element={
+            checkLogin ? <OrderProducts /> : <Navigate to="/dang-nhap" />
+          }
+        />
+          <Route
+          path="/dat-hang-thanh-cong"
+          element={
+            checkLogin ? <OrderComplete /> : <Navigate to="/dang-nhap" />
+          }
+        />
       </Routes>
+      {/* </ProtectRouters> */}
     </BrowserRouter>
   );
 }

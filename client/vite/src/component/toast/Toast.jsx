@@ -4,10 +4,10 @@ import { GrFormClose } from "react-icons/gr";
 import { closeToast } from "./ShowToast";
 import { BiSolidErrorCircle } from "react-icons/bi";
 
-const Toast = ({ checkToast, mess }) => {
+const Toast = ({ checkToast, mess, style }) => {
   return (
     <div
-      className={`bg-white flex z-[9999] p-2 absolute right-[30px] top-[60%]
+      className={`bg-white flex z-[9999] p-2 absolute right-[30px] ${style}
     shadow-2xl rounded-[10px] border-l-[6px] ${
       checkToast === true ? "border-blue-600" : "border-red-600"
     } justify-center items-center
@@ -25,7 +25,7 @@ overflow-hidden duration-500 translate-x-[calc(100%+30px)]`}
       )}
       <div className="p-2">
         <h3 className="font-[650]">
-          {checkToast === true ? "Thành công" : "Thất lại"}
+          {checkToast === true ? "Thành công" : "Thất Bại"}
         </h3>
         <span className="text-[14px] text-slate-500">{mess}</span>
       </div>

@@ -36,7 +36,7 @@ export const singIns = async ({ data }) => {
 export const checkEmailsss = async ({ email }) => {
   try {
     const { data } = await checkEmails({ email });
-    console.log(data);
+
     return data;
   } catch (error) {
     console.log("check mail fail!!!");

@@ -22,6 +22,7 @@ const LoginFacebook = () => {
         );
         await addUserOthers(res.user.reloadUserInfo);
         navigate("/trang-chu");
+        window.location.reload();
       }
     } catch (error) {
       console.log("login facebook fail");

@@ -14,6 +14,7 @@ const LoginGoogle = () => {
   const responseGoogle = async () => {
     try {
       const res = await signInWithPopup(auth, providerGG);
+
       if (res) {
         cookies.set("gg_access_token", res.user.accessToken);
         window.sessionStorage.setItem("lg", "LoginGG");
@@ -23,6 +24,7 @@ const LoginGoogle = () => {
         );
         await addUserOthers(res.user.reloadUserInfo);
         navigate("/trang-chu");
+        window.location.reload();
       }
     } catch (error) {
       console.log("login google fail");

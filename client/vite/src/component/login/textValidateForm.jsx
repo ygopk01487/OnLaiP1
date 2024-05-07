@@ -1,9 +1,9 @@
 import React from "react";
 
-const TextValidateForm = ({ textCheck }) => {
+const TextValidateForm = ({ textCheck, styles }) => {
   return (
     <div className="">
-      <span className="text-[12px] text-red-500 font-light italic">
+      <span className={`text-[14px] text-red-500 font-light italic ${styles} `}>
         {textCheck}
       </span>
     </div>
