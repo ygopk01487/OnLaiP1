@@ -15,6 +15,7 @@ const {
   forgetPassword,
   checkEmail,
   getOneUSerOTP,
+  deleteOTPPPPPPP,
 } = require("../controller/users");
 const router = express.Router();
 
@@ -33,6 +34,7 @@ router.post("/getOneUserOTP", getOneUSerOTP);
 router.put("/deleteOtp/:id", deleteOTP);
 
 router.delete("/deleteUser/:id", deleteUser);
+router.delete("/deleteOtpId/:id", deleteOTPPPPPPP);
 router.delete("/logOut", logout);
 
 module.exports = router;

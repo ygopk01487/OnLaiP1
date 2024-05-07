@@ -220,7 +220,7 @@ const sendMail = async (req, res) => {
     const otp = await generateOTP();
 
     //send mail
-    await sendMails({ email, otp });
+    await sendMails({ email, otp, type: "OTP", data: "" });
 
     //hash otp
     const hashOTP = await bcrypt.hash(otp, 10);
@@ -312,7 +312,7 @@ const getOneUSerOTP = async (req, res) => {
 
 //delete otp
 const deleteOTP = async (req, res) => {
-  const { id } = req.param;
+  const { id } = req.params;
   if (id === "") {
     return res.status(400).json({
       success: false,
@@ -320,18 +320,36 @@ const deleteOTP = async (req, res) => {
     });
   }
   try {
-    const deleteData = await OTP.findOneAndUpdate({ id, otp: "" });
-    if (deleteData) {
-      res.status(200).json({
-        success: true,
-        data: deleteData,
-        message: "Mã đã hết hạn. Bấm gửi lại để nhận lại mã",
-      });
-    }
+    const deleteData = await OTP.findByIdAndUpdate(id, { otp: "" });
+
+    res.status(200).json({
+      success: true,
+      data: deleteData,
+      message: "Mã đã hết hạn. Bấm gửi lại để nhận lại mã",
+    });
   } catch (error) {
     res
       .status(404)
       .json({ success: false, message: "delete  OTP  fail controller" });
+  }
+};
+
+//delete OTPPPPPPPPPPP
+const deleteOTPPPPPPP = async (req, res) => {
+  const { id } = req.params;
+  if (id === "" || id === null) {
+    return res.status(400).json({ success: false, message: "not null" });
+  }
+  try {
+    const data = await OTP.findByIdAndDelete(id);
+    res
+      .status(200)
+      .json({ success: true, data: data, message: "delete otpppp true" });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      message: "delete  otpppppppppp  fail controller",
+    });
   }
 };
 
@@ -417,4 +435,5 @@ module.exports = {
   forgetPassword,
   checkEmail,
   getOneUSerOTP,
+  deleteOTPPPPPPP,
 };

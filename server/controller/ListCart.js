@@ -39,8 +39,8 @@ const getByUserCart = async (req, res) => {
         .populate("user", ["name", "email"])
         .populate("userOther");
     }
-
     //get quantity
+
     const lengthCart = data.products
       .map((i) => parseInt(i.quantity))
       .reduce((a, b) => a + b, 0);
@@ -60,8 +60,7 @@ const getByUserCart = async (req, res) => {
 
 //add
 const addCart = async (req, res) => {
-  const { product, quantity, total, user, userOther, totalPrice, sale } =
-    req.body;
+  const { product, quantity, total, user, userOther, totalPrice } = req.body;
 
   if (product === "" || quantity === "" || total === "" || totalPrice === "") {
     return res.status(400).json({ success: false, message: "data not null" });
@@ -90,7 +89,6 @@ const addCart = async (req, res) => {
         user,
         userOther,
         totalPrice,
-        sale,
       });
 
       await newData.save();
@@ -151,7 +149,6 @@ const addCart = async (req, res) => {
         chekcIDCart.products.length > 0
           ? chekcIDCart.totalPrice + totalPrice
           : totalPrice,
-      sale,
     })
       .populate("products")
       .populate("products.productId")
@@ -217,9 +214,15 @@ const editCart = async (req, res) => {
       .populate("user")
       .populate("userOther");
 
+    const datas = await ListCarts.findById(id)
+      .populate("products.productId")
+      .populate("products")
+      .populate("user")
+      .populate("userOther");
+
     res
       .status(200)
-      .json({ success: true, updateCart: data, message: "update cart true" });
+      .json({ success: true, updateCart: datas, message: "update cart true" });
   } catch (error) {
     return res.status(404).json({ success: false, message: "edit  cart fail" });
   }
@@ -246,15 +249,20 @@ const deleteListProCart = async (req, res) => {
 
     pricePro = productss.map((i) => i.total * i.quantity);
 
-    const data = await ListCarts.findByIdAndUpdate(id, {
+    const datas = await ListCarts.findByIdAndUpdate(id, {
       $pull: {
         products: {
           productId: product,
         },
       },
       totalPrice: priceCart - parseInt(pricePro),
-      sale: 0,
     })
+      .populate("products")
+      .populate("products.productId")
+      .populate("user")
+      .populate("userOther");
+
+    const data = await ListCarts.findById(id)
       .populate("products")
       .populate("products.productId")
       .populate("user")
@@ -297,6 +305,58 @@ const deleteCart = async (req, res) => {
   }
 };
 
+//delete all products cart
+const deleteAllProducts = async (req, res) => {
+  const { id } = req.params;
+
+  if (id === "" || id === null) {
+    return res.status(404).json({ success: false, message: "not null" });
+  }
+  try {
+    const data = await ListCarts.findById(id);
+    data.products = [];
+    data.sale = [];
+    data.totalPrice = 0;
+    await data.save();
+
+    res.status(200).json({
+      success: true,
+      data: data,
+      message: "delete all prodcut cart true",
+    });
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ success: false, message: " delete all products cart fail" });
+  }
+};
+
+//add sale
+const addSale = async (req, res) => {
+  const { nameSale, value, id } = req.body;
+  if (nameSale === "" || value === "" || id === "") {
+    return res.status(400).json({ success: false, message: "not null" });
+  }
+  try {
+    const data = await ListCarts.findByIdAndUpdate(id, {
+      $push: {
+        sale: {
+          nameSale,
+          value,
+        },
+      },
+    });
+
+    res
+      .status(200)
+      .json({ success: true, data: data, message: "add sale true" });
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ success: false, message: " add sale cart fail" });
+  }
+};
+
 module.exports = {
   getAllCart,
   getByUserCart,
@@ -304,4 +364,6 @@ module.exports = {
   editCart,
   deleteListProCart,
   deleteCart,
+  deleteAllProducts,
+  addSale,
 };

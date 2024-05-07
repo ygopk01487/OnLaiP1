@@ -8,6 +8,8 @@ const usersOtherRouter = require("./router/usersother");
 const listLoveRouter = require("./router/listLove");
 const cartRouter = require("./router/listCart");
 const reviewRouter = require("./router/reviews");
+const ordersProducts = require("./router/order");
+
 const { Server } = require("socket.io");
 const http = require("http");
 require("dotenv").config();
@@ -27,6 +29,7 @@ app.use("/userOther", usersOtherRouter);
 app.use("/listLove", listLoveRouter);
 app.use("/listCart", cartRouter);
 app.use("/reviews", reviewRouter);
+app.use("/orders", ordersProducts);
 
 const PORT = process.env.PORT;
 

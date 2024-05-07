@@ -18,9 +18,12 @@ const ListCartsSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "usersOther",
   },
-
-  sale: { type: Number, default: 0 },
-
+  sale: [
+    {
+      nameSale: { type: String, default: "" },
+      value: { type: Number, default: 0 },
+    },
+  ],
   totalPrice: { type: Number, default: 0 },
 });
 
