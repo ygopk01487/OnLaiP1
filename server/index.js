@@ -55,3 +55,5 @@ io.on("connection", (socket) => {
 server.listen(PORT, (req, res) => {
   console.log(`Server running the PORT: ${PORT}`);
 });
+
+module.exports = app;
