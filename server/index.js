@@ -14,7 +14,7 @@ const { Server } = require("socket.io");
 const http = require("http");
 require("dotenv").config();
 
-// connectDB();
+connectDB();
 
 app.use(cors());
 app.use(express.json());
