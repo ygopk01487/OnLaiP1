@@ -17,7 +17,7 @@ const LogOutGoogle = () => {
       window.localStorage.removeItem("numberPage");
       window.localStorage.removeItem("search");
       window.localStorage.removeItem("pageSize");
-      window.sessionStorage.removeItem("counts");
+      window.localStorage.removeItem("counts");
       window.sessionStorage.removeItem("active");
       navigate("/dang-nhap");
       window.location.reload();
