@@ -4,7 +4,7 @@ require("dotenv").config();
 const connectURL = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@cluster0.yptfu6i.mongodb.net/?retryWrites=true&w=majority
 `;
 
-const connectDB = async () => {
+const connectDBB = async () => {
   try {
     await mongoose.connect(connectURL, {});
     console.log("ConnectDB trueeee!!!!!!!!!!!");
@@ -13,4 +13,4 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB;
+module.exports = connectDBB;

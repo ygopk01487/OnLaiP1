@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const connectDB = require("././connectDB/connectDB");
+const connectDBB = require("././connectDB/connectDB");
 const app = express();
 const userRouter = require("././router/users");
 const productsRouter = require("./router/products");
@@ -14,7 +14,7 @@ const { Server } = require("socket.io");
 const http = require("http");
 require("dotenv").config();
 
-connectDB();
+connectDBB();
 
 app.use(cors());
 app.use(express.json());
