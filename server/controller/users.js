@@ -1,5 +1,5 @@
 const Users = require("../modal/users");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { use } = require("../router/users");
 const { generateOTP } = require("../sendMail/generateOTP");
