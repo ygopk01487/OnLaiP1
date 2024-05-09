@@ -35,7 +35,7 @@ const PORT = process.env.PORT;
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
+const io = new Server("https://storebook-api.vercel.app", {
   cors: {
     origin: "https://storebook-client.vercel.app",
   },
