@@ -14,8 +14,6 @@ const { Server } = require("socket.io");
 const http = require("http");
 require("dotenv").config();
 
-connectDBB();
-
 app.use(cors());
 app.use(express.json());
 
@@ -53,6 +51,7 @@ io.on("connection", (socket) => {
 });
 
 server.listen(PORT, (req, res) => {
+  connectDBB();
   console.log(`Server running the PORT: ${PORT}`);
 });
 
