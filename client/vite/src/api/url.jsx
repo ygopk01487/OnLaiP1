@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const URL = "https://storebook-api.vercel.app";
+const URL = "https://localhost:5173";
 
 export const API = axios.create({ baseURL: `${URL}` });
 

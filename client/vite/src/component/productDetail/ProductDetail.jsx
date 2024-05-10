@@ -16,7 +16,7 @@ import { getByIdUserOther } from "../../action/usersOther";
 import { addListCart } from "../../action/listCart";
 import io from "socket.io-client";
 
-export const socket = io.connect("https://storebook-api.vercel.app");
+export const socket = io.connect("https://localhost:5000");
 
 export const numberFormat = new Intl.NumberFormat("de-DE", {
   style: "currency",
