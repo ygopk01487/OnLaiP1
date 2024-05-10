@@ -37,7 +37,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://storebook-client.vercel.app",
+    origin: "https://localhost:5173",
   },
 });
 
