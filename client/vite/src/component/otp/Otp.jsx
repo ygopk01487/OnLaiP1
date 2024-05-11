@@ -17,7 +17,7 @@ const Otp = () => {
   const user = location.state;
 
   const [datas, setDatas] = useState({ name: "", email: "" });
-  const [count, setCount] = useState(localStorage.getItem("counts"));
+  const [count, setCount] = useState(parseInt(localStorage.getItem("counts")));
 
   const inputRef = useRef(null);
 
@@ -80,7 +80,7 @@ const Otp = () => {
       setCheckToast(false);
       if (count > 0) {
         localStorage.setItem("counts", count - 1);
-        setCount(localStorage.getItem("counts"));
+        setCount(parseInt(localStorage.getItem("counts")));
         setMess(`Nhập sai quá ${count} lần. Mã sẽ hết hạn !`);
       } else if (count === 0) {
         const mess = await deleteOTP();
