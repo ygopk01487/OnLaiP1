@@ -61,9 +61,10 @@ const Otp = () => {
     const id = await getOneUserOtp(
       user.url === "/quen-mat-khau" ? user.email.email : user.email
     );
-
-    const mess = await deleteOtp(id);
-    return mess;
+    if (id) {
+      const mess = await deleteOtp(id);
+      return mess;
+    }
   };
 
   const checkOTP = async (e) => {
@@ -82,7 +83,7 @@ const Otp = () => {
         setCount(localStorage.getItem("counts"));
         setMess(`Nhập sai quá ${count} lần. Mã sẽ hết hạn !`);
       } else if (count === 0) {
-        deleteOTP();
+        const mess = await deleteOTP();
 
         if (mess) {
           setCount(0);
