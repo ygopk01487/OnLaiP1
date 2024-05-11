@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const URL = "http://localhost:5000";
+const URL = "http://storebook-api.onrender.com";
 
 export const API = axios.create({ baseURL: `${URL}` });
 
