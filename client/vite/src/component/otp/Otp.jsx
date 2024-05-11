@@ -78,7 +78,8 @@ const Otp = () => {
       setShowToasts(true);
       setCheckToast(false);
       if (count > 0) {
-        setCount(count - 1);
+        localStorage.setItem("counts", count - 1);
+        setCount(localStorage.getItem("counts"));
         setMess(`Nhập sai quá ${count} lần. Mã sẽ hết hạn !`);
       } else if (count === 0) {
         deleteOTP();
