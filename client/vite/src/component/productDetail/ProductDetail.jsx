@@ -16,7 +16,7 @@ import { getByIdUserOther } from "../../action/usersOther";
 import { addListCart } from "../../action/listCart";
 import io from "socket.io-client";
 
-export const socket = io.connect("http://storebook-api.onrender.com");
+export const socket = io.connect("https://storebook-api.onrender.com");
 
 export const numberFormat = new Intl.NumberFormat("de-DE", {
   style: "currency",
