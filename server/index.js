@@ -35,7 +35,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://663ece951107b275f0a0bcb7--storebooks-client.netlify.app",
+    origin: "https://storebooks-client.netlify.app/",
   },
 });
 
