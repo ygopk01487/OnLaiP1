@@ -91,10 +91,10 @@ const Otp = () => {
       }
     } else {
       if (user.url === "/quen-mat-khau") {
-        deleteOTP()
+        deleteOTP();
         navigate("/doi-mat-khau", { state: user.email.email });
       } else {
-        deleteOTP()
+        deleteOTP();
         navigate("/dang-ky-mat-khau", { state: datas });
       }
     }
@@ -102,6 +102,7 @@ const Otp = () => {
   };
 
   const sendMails = async () => {
+    deleteOTP();
     await sendMailss(user.email);
     setLoading(true);
     setShowToasts(true);
