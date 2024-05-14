@@ -173,6 +173,9 @@ const Menu = () => {
         direction *= -1;
       }
     }, 300);
+
+    //dung khi interval ngat ket noi vs components
+    return () => clearInterval(intr);
   };
 
   useEffect(() => {
