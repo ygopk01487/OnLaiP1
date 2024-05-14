@@ -48,6 +48,10 @@ const Menu = () => {
 
   const [loadCart, setLoadCart] = useState("");
 
+  //typing placeholder
+  const [placeholder, setPlaceholder] = useState("");
+  const textPlaceholder = "Tìm kiếm theo tên sách...";
+
   // ham
   const openMenuUser = () => {
     setOpenMenuU((i) => !i);
@@ -152,6 +156,25 @@ const Menu = () => {
       JSON.stringify(window.localStorage.setItem("active", name));
   };
 
+  //function typing placeholder
+  const typingPlaceholder = () => {
+    let i = 0;
+
+    // 1 thi` them -1 thi xoa
+    let direction = 1;
+
+    setInterval(() => {
+      i += direction;
+      setPlaceholder(textPlaceholder.slice(0, i));
+
+      //neu da toi dau chuoi hoac cuoi chuoi thi dao nguoc
+      if (i + 1 >= textPlaceholder.length || i <= 0) {
+        //dao nguoc
+        direction *= -1;
+      }
+    }, 300);
+  };
+
   useEffect(() => {
     //menu scroll
     ScrollMenu();
@@ -166,6 +189,9 @@ const Menu = () => {
     } else {
       getIdUserOther();
     }
+
+    //typing placeholdet
+    typingPlaceholder();
   }, []);
 
   useEffect(() => {
@@ -194,9 +220,9 @@ const Menu = () => {
           <input
             className="p-3 rounded-[4px] outline-none w-[50%] border-t-[2px] border-b-[2px] 
             border-l-[2px] border-gray-300"
-            placeholder="Tìm kiếm sách ở đây"
+            placeholder={placeholder}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value.trim())}
           />
           <button
             className=" border-green-600 border-t-[2px] border-b-[2px] border-r-[2px]
