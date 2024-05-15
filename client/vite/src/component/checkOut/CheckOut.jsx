@@ -239,7 +239,7 @@ const CheckOut = () => {
   const addSaleC = async () => {
     let check = "";
 
-    if (check === "") {
+    if (nameSale === "") {
       return alert("Nhập mã vào");
     }
 
