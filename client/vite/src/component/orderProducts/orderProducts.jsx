@@ -138,7 +138,7 @@ const OrderProducts = () => {
                               </span>
                             </li>
                             <li className="text-[15px]">
-                              Địa chỉ:
+                              Đất nước:
                               <span className="font-[700] ml-[4px]">
                                 {i.details.country}
                               </span>
