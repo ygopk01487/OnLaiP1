@@ -57,14 +57,12 @@ const SignUpOne = () => {
 
     let validate = false;
 
-    const { nameV, emailV } = validateForms();
+    let { nameV, emailV } = validateForms();
+    console.log(nameV);
 
-    if (emailV === false) {
-      clearTextValieDateForm({ emailV });
-    }
-
-    if (nameV === false) {
-      clearTextValieDateForm({ nameV });
+    if (nameV === false || emailV === false) {
+      clearTextValieDateForm({ nameV, emailV });
+      validate = false;
     }
 
     if (nameV === false && emailV === false) validate = true;
@@ -91,8 +89,8 @@ const SignUpOne = () => {
 
   //vali form
   const validateForms = () => {
-    let nameV = false;
-    let emailV = false;
+    let nameV = "";
+    let emailV = "";
     let regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
     //name
@@ -102,6 +100,9 @@ const SignUpOne = () => {
     } else if (user.name.trim().length < 5) {
       setTextName("Tên quá ngắn");
       nameV = true;
+    } else {
+      setTextName("");
+      nameV = false;
     }
 
     //email
@@ -111,6 +112,9 @@ const SignUpOne = () => {
     } else if (!regexEmail.test(user.email.trim())) {
       setTextEmail("Không đúng định dạng email, gmail");
       emailV = true;
+    } else {
+      setTextEmail("");
+      emailV = false;
     }
 
     return { nameV, emailV };
@@ -155,7 +159,7 @@ const SignUpOne = () => {
         <Loading />
       ) : (
         <>
-          <div className="bg-white w-[700px] h-[500px] m-auto rounded-md mt-[50px] shadow-lg">
+          <div className="bg-white w-[700px] h-[auto] m-auto rounded-md mt-[50px] shadow-lg">
             <div className="grid grid-cols-2 h-[100%] w-[100%]">
               <div className="flex items-center justify-center h-[100%]">
                 <span className="bg-slate-200 rounded-[100px] p-10">
@@ -207,7 +211,7 @@ const SignUpOne = () => {
                     </button>
                   </form>
                   {/* quen mat khau */}
-                  <div className="p-2 mt-[40px]">
+                  <div className="p-2 mt-[60px]">
                     <h4 className="text-forget-pass" onClick={goToForgetPass}>
                       Quên mật khẩu?
                     </h4>

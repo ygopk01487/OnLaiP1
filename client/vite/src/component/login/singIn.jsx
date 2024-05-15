@@ -166,7 +166,7 @@ const SingIn = () => {
       {loading ? (
         <Loading />
       ) : (
-        <div className="bg-white w-[700px] h-[500px] m-auto rounded-md mt-[50px] shadow-lg">
+        <div className="bg-white w-[700px] h-[auto] m-auto rounded-md mt-[50px] shadow-lg">
           <div className="grid grid-cols-2 h-[100%] w-[100%]">
             <div className="flex items-center justify-center h-[100%]">
               <span className="bg-slate-200 rounded-[100px] p-10">

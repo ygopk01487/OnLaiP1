@@ -249,7 +249,7 @@ const ProductDetail = () => {
 
   //add review
   const addRv = async () => {
-    if (star > 0) {
+    if (star > 0 || comment !== "") {
       const userOther = JSON.parse(window.sessionStorage.getItem("user"));
       let data;
       let datas;

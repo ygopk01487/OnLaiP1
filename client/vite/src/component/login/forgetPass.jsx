@@ -15,7 +15,7 @@ const ForgetPass = () => {
 
   const location = useLocation();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState({ email: "" });
 
   const [loading, setLoading] = useState(true);
 
@@ -29,11 +29,14 @@ const ForgetPass = () => {
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     let valiForm = false;
-    const { emailV } = validateForm();
+    let { emailV } = validateForm();
+
     if (emailV === false) {
       valiForm = true;
+      clearTextVali({ emailV });
+    } else {
+      valiForm = false;
       clearTextVali({ emailV });
     }
 
@@ -73,15 +76,18 @@ const ForgetPass = () => {
   };
 
   const validateForm = () => {
-    let emailV = false;
+    let emailV = "";
     let regexEmail = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
     if (email.email.trim() === "") {
-      emailV = true;
       setTextVali("Email ko được bỏ trống");
-    } else if (!regexEmail.test(email.email.trim())) {
       emailV = true;
+    } else if (!regexEmail.test(email.email)) {
       setTextVali("Không đúng định dạng mail");
+      emailV = true;
+    } else {
+      setTextVali("");
+      emailV = false;
     }
     return { emailV };
   };
