@@ -275,38 +275,38 @@ const CheckOut = () => {
   };
 
   //typing code sale
-  const typingCodeSale = () => {
-    //lay thu tu chu
-    let i = 0;
+  // const typingCodeSale = () => {
+  //   //lay thu tu chu
+  //   let i = 0;
 
-    // 1 thi viet, -1 thi xoa
-    let direction = 1;
+  //   // 1 thi viet, -1 thi xoa
+  //   let direction = 1;
 
-    //chu de lay
-    const text = "Nhập mã ở đây";
+  //   //chu de lay
+  //   const text = "Nhập mã ở đây";
 
-    const run = setInterval(() => {
-      //tang i de lay tung ky tu 1 lay, -1 xoa
-      i += direction;
-      //gan gia tri
-      setTextCode(text.slice(0, i));
-      //kiem tra neu i + 1 >= so thu tu ky tu cuoi cua chu hoac i <= so thu tu ki tu dau cua chu thi se dao nguoc
-      if (i + 1 >= text.length || i <= 0) {
-        direction *= -1;
-        //neu i + 1 == ky tu cuoi thi se dung khaong 1s
-        if (direction === -1) {
-          setTimeout(() => {
-            direction *= -1;
-          }, 1000);
-          //qua 1s thi chay lai
-          direction *= -1;
-        }
-      }
-    }, 100);
+  //   const run = setInterval(() => {
+  //     //tang i de lay tung ky tu 1 lay, -1 xoa
+  //     i += direction;
+  //     //gan gia tri
+  //     setTextCode(text.slice(0, i));
+  //     //kiem tra neu i + 1 >= so thu tu ky tu cuoi cua chu hoac i <= so thu tu ki tu dau cua chu thi se dao nguoc
+  //     if (i + 1 >= text.length || i <= 0) {
+  //       direction *= -1;
+  //       //neu i + 1 == ky tu cuoi thi se dung khaong 1s
+  //       if (direction === -1) {
+  //         setTimeout(() => {
+  //           direction *= -1;
+  //         }, 1000);
+  //         //qua 1s thi chay lai
+  //         direction *= -1;
+  //       }
+  //     }
+  //   }, 100);
 
-    //dung lai khi ngat noi ket voi component
-    return () => clearInterval(run);
-  };
+  //   //dung lai khi ngat noi ket voi component
+  //   return () => clearInterval(run);
+  // };
 
   useEffect(() => {
     const checkUserOther = JSON.parse(window.sessionStorage.getItem("user"));
@@ -319,7 +319,7 @@ const CheckOut = () => {
 
     getByIdUSerOthers();
 
-    typingCodeSale();
+    // typingCodeSale();
   }, []);
 
   useEffect(() => {
@@ -380,7 +380,7 @@ const CheckOut = () => {
                   Sao chép mã ở đây
                 </span>
                 <span
-                  className={`cursor-pointer ml-[5px] w-[30px] h-[30px]
+                  className={`cursor-pointer ml-[5px] p-[5px]
                 rounded-[3px] flex items-center justify-center bg-gray-600 text-white
                 ${copyCode ? "pointer-events-none" : "pointer-events-auto"}`}
                   onClick={() => copyCodeSale("ADMIN")}
@@ -411,7 +411,7 @@ const CheckOut = () => {
                   type="text"
                   value={nameSale}
                   onChange={(e) => setNameSale(e.target.value.trim())}
-                  placeholder={textCode}
+                  placeholder="Nhập mã ở đây"
                 />
                 <button
                   className="text-[14px] font-[500] uppercase

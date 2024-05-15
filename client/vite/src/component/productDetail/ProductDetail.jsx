@@ -338,36 +338,36 @@ const ProductDetail = () => {
   };
 
   //typing placeholder comment
-  const typingPlaceholder = () => {
-    const text = "Nhập bình luận ở đây";
-    //lay thu tu chu
-    let i = 0;
+  // const typingPlaceholder = () => {
+  //   const text = "Nhập bình luận ở đây";
+  //   //lay thu tu chu
+  //   let i = 0;
 
-    // 1 thi viet, -1 thi xoa
-    let direction = 1;
+  //   // 1 thi viet, -1 thi xoa
+  //   let direction = 1;
 
-    const run = setInterval(() => {
-      //tang i de lay tung ky tu 1 lay, -1 xoa
-      i += direction;
-      //gan gia tri
-      setPlaceholder(text.slice(0, i));
-      //kiem tra neu i + 1 >= so thu tu ky tu cuoi cua chu hoac i <= so thu tu ki tu dau cua chu thi se dao nguoc
-      if (i + 1 >= text.length || i <= 0) {
-        direction *= -1;
-        //neu i + 1 == ky tu cuoi thi se dung khaong 1s
-        if (direction === -1) {
-          setTimeout(() => {
-            direction *= -1;
-          }, 1000);
-          //qua 1s thi chay lai
-          direction *= -1;
-        }
-      }
-    }, 100);
+  //   const run = setInterval(() => {
+  //     //tang i de lay tung ky tu 1 lay, -1 xoa
+  //     i += direction;
+  //     //gan gia tri
+  //     setPlaceholder(text.slice(0, i));
+  //     //kiem tra neu i + 1 >= so thu tu ky tu cuoi cua chu hoac i <= so thu tu ki tu dau cua chu thi se dao nguoc
+  //     if (i + 1 >= text.length || i <= 0) {
+  //       direction *= -1;
+  //       //neu i + 1 == ky tu cuoi thi se dung khaong 1s
+  //       if (direction === -1) {
+  //         setTimeout(() => {
+  //           direction *= -1;
+  //         }, 1000);
+  //         //qua 1s thi chay lai
+  //         direction *= -1;
+  //       }
+  //     }
+  //   }, 100);
 
-    //dung lai khi ngat noi ket voi component
-    return () => clearInterval(run);
-  };
+  //   //dung lai khi ngat noi ket voi component
+  //   return () => clearInterval(run);
+  // };
 
   //
   useEffect(() => {
@@ -382,7 +382,7 @@ const ProductDetail = () => {
 
     getByUserListLoves();
 
-    typingPlaceholder();
+    // typingPlaceholder();
   }, []);
 
   useEffect(() => {
@@ -636,7 +636,7 @@ const ProductDetail = () => {
                     <textarea
                       onChange={(e) => setComment(e.target.value)}
                       className="p-[20px] rounded-[3px] outline-none border-[2px] border-gray-400"
-                      placeholder={placeholder}
+                      placeholder="Nhập bình luận ở đây"
                       value={comment}
                     />
                     <button
