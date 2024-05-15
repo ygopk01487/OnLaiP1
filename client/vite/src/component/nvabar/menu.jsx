@@ -267,7 +267,7 @@ const Menu = () => {
           before:content-[''] before:w-[20px] before:h-[20px]
         before:bg-white before:absolute before:top-[-6.3%] before:rotate-45
         before:border-gray-200 before:border-t-[2px] before:border-l-[2px] 
-        top-[13%]
+        top-[13%] z-[9999]
         ${
           openMenuU
             ? `visible opacity-100  animate-menuMiniTop`
