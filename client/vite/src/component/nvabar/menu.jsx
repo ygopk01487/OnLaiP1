@@ -171,6 +171,14 @@ const Menu = () => {
       if (i + 1 >= textPlaceholder.length || i <= 0) {
         //dao nguoc
         direction *= -1;
+        //kiem tra neu direction = -1 thi dung tam 1s
+        if (direction === -1) {
+          setTimeout(() => {
+            direction *= -1;
+          }, 1000);
+          //sau khi dung 1s thi se chay lay
+          direction *= -1;
+        }
       }
     }, 100);
 
@@ -321,7 +329,7 @@ const Menu = () => {
       </div>
       {/* gio hang */}
       <div
-        className=" flex items-center cursor-pointer w-[260px]  ml-[30px] relavite "
+        className=" flex items-center cursor-pointer w-[260px] z-[9999] ml-[30px] relavite "
         onClick={openCMini}
       >
         <span>

@@ -15,6 +15,7 @@ import { CiStickyNote } from "react-icons/ci";
 import { addOrderPro } from "../../action/order";
 import { useNavigate } from "react-router-dom";
 import TextValidateForm from "../login/textValidateForm";
+import { MdContentCopy } from "react-icons/md";
 
 const CheckOut = () => {
   const [checkBox, setCheckBox] = useState(true);
@@ -52,6 +53,9 @@ const CheckOut = () => {
   const [pAddress, setPAddress] = useState("");
 
   const [nameSale, setNameSale] = useState("");
+
+  const [copyCode, setCopyCode] = useState(false);
+  const [textCode, setTextCode] = useState("");
 
   //function
   const checkOrder = () => {
@@ -234,6 +238,11 @@ const CheckOut = () => {
   //add sale
   const addSaleC = async () => {
     let check = "";
+
+    if (check === "") {
+      return alert("Nhập mã vào");
+    }
+
     if (dataCart.sale.map((i) => i.nameSale).includes(nameSale)) {
       check = false;
     } else {
@@ -256,6 +265,49 @@ const CheckOut = () => {
     }
   };
 
+  //copy code sale
+  const copyCodeSale = (text) => {
+    setCopyCode(true);
+    navigator.clipboard.writeText(text);
+    setTimeout(() => {
+      setCopyCode(false);
+    }, 1000);
+  };
+
+  //typing code sale
+  const typingCodeSale = () => {
+    //lay thu tu chu
+    let i = 0;
+
+    // 1 thi viet, -1 thi xoa
+    let direction = 1;
+
+    //chu de lay
+    const text = "Nhập mã ở đây";
+
+    const run = setInterval(() => {
+      //tang i de lay tung ky tu 1 lay, -1 xoa
+      i += direction;
+      //gan gia tri
+      setTextCode(text.slice(0, i));
+      //kiem tra neu i + 1 >= so thu tu ky tu cuoi cua chu hoac i <= so thu tu ki tu dau cua chu thi se dao nguoc
+      if (i + 1 >= text.length || i <= 0) {
+        direction *= -1;
+        //neu i + 1 == ky tu cuoi thi se dung khaong 1s
+        if (direction === -1) {
+          setTimeout(() => {
+            direction *= -1;
+          }, 1000);
+          //qua 1s thi chay lai
+          direction *= -1;
+        }
+      }
+    }, 100);
+
+    //dung lai khi ngat noi ket voi component
+    return () => clearInterval(run);
+  };
+
   useEffect(() => {
     const checkUserOther = JSON.parse(window.sessionStorage.getItem("user"));
     if (!checkUserOther) {
@@ -266,6 +318,8 @@ const CheckOut = () => {
     }
 
     getByIdUSerOthers();
+
+    typingCodeSale();
   }, []);
 
   useEffect(() => {
@@ -308,7 +362,7 @@ const CheckOut = () => {
             <>
               <div
                 className="w-[100%] border-t-[4px] border-green-600 bg-gray-200
-          flex items-center  p-[15px] mt-[50px]"
+          flex items-center  p-[15px] mt-[50px] relative"
               >
                 <span className="flex items-center mr-[5px]">
                   <CiStickyNote size="18px" />
@@ -322,6 +376,28 @@ const CheckOut = () => {
                 >
                   Bấm vào đây nhập mã ADMIN để giảm giá
                 </span>
+                <span className="text-[11px] font-[450] ml-[1%]">
+                  Sao chép mã ở đây
+                </span>
+                <span
+                  className={`cursor-pointer ml-[5px] w-[30px] h-[30px]
+                rounded-[3px] flex items-center justify-center bg-gray-600 text-white
+                ${copyCode ? "pointer-events-none" : "pointer-events-auto"}`}
+                  onClick={() => copyCodeSale("ADMIN")}
+                >
+                  <MdContentCopy size="16px" />
+                </span>
+                {/* thong bao da sao chep thanh cong */}
+                <span
+                  className={`w-[80px] h-[30px] w-[10%]
+                bg-black relative text-white text-[10px] font-[550]
+                 left-[1%] flex items-center justify-center rounded-[8px]
+                 after:content-[''] after:absolute after:bg-black after:left-[-6%] after:top-[30%]
+                 after:p-[5px] after:rotate-[45deg] duration-[1s]
+                 ${copyCode ? "opacity-100 visible" : "opacity-0 invisible"}`}
+                >
+                  Đã sao chép
+                </span>
               </div>
               {/* giao dien nhap code */}
               <div
@@ -332,10 +408,10 @@ const CheckOut = () => {
               >
                 <input
                   className="w-[15%] p-[15px] bg-gray-200 outline-none text-[14px] mr-[20px]"
-                  placeholder="Nhập mã ở đây"
                   type="text"
                   value={nameSale}
-                  onChange={(e) => setNameSale(e.target.value)}
+                  onChange={(e) => setNameSale(e.target.value.trim())}
+                  placeholder={textCode}
                 />
                 <button
                   className="text-[14px] font-[500] uppercase
