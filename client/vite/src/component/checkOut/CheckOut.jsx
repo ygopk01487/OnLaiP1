@@ -182,9 +182,6 @@ const CheckOut = () => {
     if (data.country.trim() === "") {
       setPCountry("Không được bỏ trống !");
       check = false;
-    } else if (data.country !== "") {
-      setPCountry("");
-      check = true;
     }
 
     if (data.address.trim() === "") {
@@ -193,17 +190,11 @@ const CheckOut = () => {
     } else if (data.address.length < 5) {
       setPAddress("Địa chỉ không chi tiết!");
       check = false;
-    } else if (data.address !== "") {
-      setPAddress("");
-      check = true;
     }
 
     if (data.phone.trim() === "") {
       setPPhone("Không được bỏ trống !");
       check = false;
-    } else if (data.phone !== "") {
-      setPPhone("");
-      check = true;
     }
 
     if (data.notes.trim() === "") {
@@ -212,7 +203,17 @@ const CheckOut = () => {
     } else if (data.notes.length < 5) {
       setPNotes("Quá ngắn !");
       check = false;
-    } else if (data.notes !== "") {
+    }
+
+    if (
+      data.country !== "" ||
+      data.address !== "" ||
+      data.notes !== "" ||
+      data.phone !== ""
+    ) {
+      setPAddress("");
+      setPCountry("");
+      setPPhone("");
       setPNotes("");
       check = true;
     }

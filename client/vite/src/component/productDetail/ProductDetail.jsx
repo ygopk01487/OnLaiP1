@@ -292,7 +292,7 @@ const ProductDetail = () => {
         socket.emit("comment", data.review);
       }
     } else {
-      alert("Thêm đánh giá sao");
+      alert("Thêm đánh giá sao hoặc viết bình luận");
     }
   };
 
