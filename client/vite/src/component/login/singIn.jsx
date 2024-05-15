@@ -183,6 +183,7 @@ const SingIn = () => {
                     <InputForm
                       type="text"
                       pla="Email"
+                      val={data.email}
                       name="email"
                       onChang={handleChange}
                     />
@@ -195,6 +196,7 @@ const SingIn = () => {
                     <InputForm
                       type={`${!showPass ? "password" : "text"}`}
                       pla="Mật khẩu"
+                      val={data.password}
                       name="password"
                       onChang={handleChange}
                     />
