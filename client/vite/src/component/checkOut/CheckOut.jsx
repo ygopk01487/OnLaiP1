@@ -128,13 +128,14 @@ const CheckOut = () => {
     let { checkCountry, checkAdd, checkNote, checkPhone } = checkOrderPro();
 
     if (
-      checkCountry === true ||
-      checkAdd === true ||
-      checkNote === true ||
-      checkPhone === true
+      checkCountry === false ||
+      checkAdd === false ||
+      checkNote === false ||
+      checkPhone === false
     ) {
       clearTextCheck({ checkCountry, checkAdd, checkNote, checkPhone });
     }
+    console.log(checkCountry, checkAdd, checkNote, checkPhone);
 
     if (
       checkCountry === true &&
@@ -143,7 +144,7 @@ const CheckOut = () => {
       checkPhone === true
     ) {
       clearTextCheck({ checkCountry, checkAdd, checkNote, checkPhone });
-      setCheckValueOrder(true);
+      // setCheckValueOrder(true);
       let datas;
 
       if (!userOther) {
@@ -237,7 +238,7 @@ const CheckOut = () => {
       checkNote = true;
     }
 
-    return checkCountry, checkAdd, checkNote, checkPhone;
+    return { checkCountry, checkAdd, checkNote, checkPhone };
   };
 
   //clear text check
@@ -249,23 +250,27 @@ const CheckOut = () => {
   }) => {
     if (checkCountry === true) {
       setPCountry("");
+    } else {
+      setData({ ...data, country: "" });
     }
+
     if (checkAdd === true) {
       setPAddress("");
+    } else {
+      setData({ ...data, address: "" });
     }
+
     if (checkNote === true) {
       setPNotes("");
+    } else {
+      setData({ ...data, notes: "" });
     }
+
     if (checkPhone === true) {
       setPPhone("");
+    } else {
+      setData({ ...data, phone: "" });
     }
-    setData({
-      ...data,
-      country: "",
-      address: "",
-      phone: "",
-      notes: "",
-    });
   };
 
   //add sale
