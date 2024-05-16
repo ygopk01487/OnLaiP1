@@ -261,7 +261,7 @@ const OrderProducts = () => {
                                     Tổng phải trả:
                                   </td>
                                   <td className="font-[450] p-[10px]">
-                                    {numberFormat.format(i.totalPrice)}
+                                    {numberFormat.format(i.totalPriceSale)}
                                   </td>
                                 </tr>
                               </tbody>
