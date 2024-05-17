@@ -85,6 +85,9 @@ const HomeSection = () => {
 
   const [countAddCart, setCountAddCart] = useState(0);
 
+  const [loadingAddListLove, setLoadingAddListLove] = useState(false);
+  const [loadingAddCart, setLoadingAddCart] = useState(false);
+
   // const [loadToast, setLoadToast] = useState(false);
   // const [checkToast, setCheckToast] = useState(false);
   // const [mess, setMess] = useState("");
@@ -151,6 +154,7 @@ const HomeSection = () => {
 
   //add list love
   const addListLoves = async (idProduct) => {
+    setLoadingAddListLove(true);
     //get userOne
     const userOther = JSON.parse(window.sessionStorage.getItem("user"));
     let user;
@@ -172,13 +176,16 @@ const HomeSection = () => {
     if (data) {
       getListUserLove();
       alert("Thêm vào danh sách yêu thích thành công");
+      setLoadingAddListLove(false);
     } else {
       alert("thêm vào danh sách yêu thích thất bại");
+      setLoadingAddListLove(false);
     }
   };
 
   //delete love
   const deleteLove = async (idProduct) => {
+    setLoadingAddListLove(true);
     const userOther = JSON.parse(window.sessionStorage.getItem("user"));
     let user;
     if (!userOther) {
@@ -204,8 +211,10 @@ const HomeSection = () => {
         if (data) {
           getListUserLove();
           alert("xóa sản phẩm khỏi danh sách yêu thích thành công");
+          setLoadingAddListLove(false);
         } else {
           alert("xóa sản phẩm khỏi danh sách yêu thích thất bại");
+          setLoadingAddListLove(false);
         }
       }
     }
@@ -239,6 +248,7 @@ const HomeSection = () => {
   //get cart by user
   //add cart
   const addListCarts = async (product, total, quanitty, totalPrice) => {
+    setLoadingAddCart(true);
     const userOther = JSON.parse(window.sessionStorage.getItem("user"));
     let user;
     let datas;
@@ -274,8 +284,10 @@ const HomeSection = () => {
       alert("them vao gio hang thanh cong");
       setCountAddCart(countAddCart + 1);
       socket.emit("loadCart", countAddCart);
+      setLoadingAddCart(false);
     } else {
       alert("them vao gio hang that bai");
+      setLoadingAddCart(false);
     }
   };
   //edit cart
@@ -499,7 +511,12 @@ const HomeSection = () => {
                               <ul className="grid grid-cols-2 p-1 w-[100%] items-center">
                                 <li className="border-r-[2px] border-gray-200 p-2">
                                   <span
-                                    className="cursor-pointer hover:text-green-600 duration-[0.5s]"
+                                    className={`cursor-pointer hover:text-green-600 duration-[0.5s]
+                                    ${
+                                      loadingAddCart
+                                        ? "pointer-events-none"
+                                        : "pointer-events-auto"
+                                    }`}
                                     onClick={() =>
                                       addListCarts(
                                         product._id,
@@ -525,7 +542,12 @@ const HomeSection = () => {
                                       )
                                         ? "text-green-500"
                                         : ""
-                                    } hover:text-green-600 duration-[0.5s]`}
+                                    } hover:text-green-600 duration-[0.5s]
+                                    ${
+                                      loadingAddListLove
+                                        ? "pointer-events-none"
+                                        : "pointer-events-auto"
+                                    } `}
                                     onClick={() =>
                                       listLove.some(
                                         (i) => i._id === product._id

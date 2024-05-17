@@ -30,6 +30,8 @@ const Carts = () => {
 
   const [loadCart, setLoadCart] = useState(false);
 
+  const [loadingQuantity, setLoadingQuantity] = useState(false);
+
   const navigate = useNavigate();
 
   //ham
@@ -85,13 +87,16 @@ const Carts = () => {
   //edit cart
   const editListCarts = async (product, quantity, total, type) => {
     // setQuantityPro(quantityPro + 1);
+    setLoadingQuantity(true);
     const data = await editListCart(idCart, product, quantity, total, type);
     if (data) {
       alert("sua thanh cong");
+      setLoadingQuantity(false);
       getByUserCarts();
       socket.emit("loadCart", data);
     } else {
       alert("sua that bai");
+      setLoadingQuantity(false);
     }
   };
 
@@ -214,10 +219,11 @@ const Carts = () => {
                               <div className="flex items-center justify-center">
                                 <span
                                   className={`${
-                                    i.quantity <= 1
+                                    i.quantity <= 1 || loadingQuantity
                                       ? "pointer-events-none"
                                       : "pointer-events-auto"
-                                  } icon-add-remove-carts`}
+                                  } icon-add-remove-carts
+                                  `}
                                   onClick={() =>
                                     editListCarts(
                                       i.productId._id,
@@ -234,10 +240,10 @@ const Carts = () => {
                                 </span>
                                 <span
                                   className={`${
-                                    i.quantity >= 10
+                                    i.quantity >= 10 || loadingQuantity
                                       ? " pointer-events-none"
                                       : " pointer-events-auto"
-                                  } icon-add-remove-carts`}
+                                  } icon-add-remove-carts `}
                                   onClick={() =>
                                     editListCarts(
                                       i.productId._id,

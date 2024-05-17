@@ -57,6 +57,8 @@ const CheckOut = () => {
   const [copyCode, setCopyCode] = useState(false);
   const [textCode, setTextCode] = useState("");
 
+  const [loadingCodeSale, setloadingCodeSale] = useState(false);
+
   //function
   const checkOrder = () => {
     setCheckBox((i) => !i);
@@ -275,6 +277,7 @@ const CheckOut = () => {
 
   //add sale
   const addSaleC = async () => {
+    setloadingCodeSale(true);
     let check = "";
 
     if (nameSale === "") {
@@ -297,9 +300,11 @@ const CheckOut = () => {
         setData({ nameSale: nameSale });
         // setNameSale("");
         getByCarUser();
+        setloadingCodeSale(false);
       }
     } else if (check === false) {
       alert("Mã này bạn đã sử dụng");
+      setloadingCodeSale(false);
     }
   };
 
