@@ -9,10 +9,6 @@ import Loading from "../loading/Loading";
 const Home = () => {
   const [loading, setLoading] = useState(true);
 
-  const [test, setTest] = useState(
-    "" || JSON.stringify(window.localStorage.getItem("IdPC"))
-  );
-
   const loadingPage = () => {
     setTimeout(() => {
       setLoading(false);
@@ -32,7 +28,7 @@ const Home = () => {
           {/* dau` giao dien */}
           <div className="w-[1200px] m-auto ">
             {/* menu */}
-            <Menu test={test} />
+            <Menu />
             <Slider />
             {/* Than giao dien */}
             <HomeSection />

@@ -28,7 +28,10 @@ const HomeSection = () => {
     "" || window.localStorage.getItem("numberPage")
   );
   const [name, setName] = useState("" || window.localStorage.getItem("search"));
-  const [sort, setSort] = useState({ sort: "", type: "" });
+  const [sort, setSort] = useState({
+    sort: "" || JSON.parse(window.localStorage.getItem("sort")).sort,
+    type: "" || JSON.parse(window.localStorage.getItem("sort")).type,
+  });
   const [miniSort, setMiniSort] = useState([
     { name: "Mặc định", type: "", value: "", param: "" },
     { name: "Tên (A-Z)", type: "increase", value: "name", param: "TenA-Z" },
@@ -102,6 +105,11 @@ const HomeSection = () => {
     setSort({ sort: value, type: type });
     setSearch({ sort: param });
     window.localStorage.setItem("nameSort", nameSort);
+
+    window.localStorage.setItem(
+      "sort",
+      JSON.stringify({ sort: value, type: type })
+    );
   };
 
   const fcSetPageSize = (i) => {
@@ -312,6 +320,8 @@ const HomeSection = () => {
 
     if (nameSorts) setNameSort(nameSorts);
   }, [number, sort, name, pageS, totalPage]);
+
+  console.log("sort: ", sort);
 
   return (
     <>
