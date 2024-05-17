@@ -63,6 +63,7 @@ const Menu = () => {
 
   const fcSearch = () => {
     window.localStorage.setItem("search", search);
+    window.localStorage.setItem("numberPage", 1);
   };
 
   //get userOne
@@ -104,6 +105,7 @@ const Menu = () => {
     window.localStorage.removeItem("search");
     window.localStorage.removeItem("pageSize");
     window.localStorage.removeItem("counts");
+    window.localStorage.removeItem("sort");
     window.sessionStorage.removeItem("active");
     navigate("/dang-nhap");
     window.location.reload();

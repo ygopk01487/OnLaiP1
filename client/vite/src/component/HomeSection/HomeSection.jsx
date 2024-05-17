@@ -28,9 +28,20 @@ const HomeSection = () => {
     "" || window.localStorage.getItem("numberPage")
   );
   const [name, setName] = useState("" || window.localStorage.getItem("search"));
+
+  let sorts = "";
+  let type = "";
+  if (!JSON.parse(window.localStorage.getItem("sort"))) {
+    sorts = "";
+    type = "";
+  } else {
+    sorts = JSON.parse(window.localStorage.getItem("sort")).sort;
+    type = JSON.parse(window.localStorage.getItem("sort")).type;
+  }
+
   const [sort, setSort] = useState({
-    sort: "" || JSON.parse(window.localStorage.getItem("sort")).sort,
-    type: "" || JSON.parse(window.localStorage.getItem("sort")).type,
+    sort: sorts,
+    type: type,
   });
   const [miniSort, setMiniSort] = useState([
     { name: "Mặc định", type: "", value: "", param: "" },
@@ -308,11 +319,11 @@ const HomeSection = () => {
   // }, [addListLoves, deleteLove]);
 
   useEffect(() => {
-    if (name) {
-      setSearch({ name });
-      setNumber(1);
-      window.localStorage.setItem("numberPage", 1);
-    }
+    // if (name) {
+    //   setSearch({ name });
+    //   setNumber(1);
+    //   window.localStorage.setItem("numberPage", 1);
+    // }
 
     getProductAll(number, sort, name, pageS);
 
@@ -321,7 +332,7 @@ const HomeSection = () => {
     if (nameSorts) setNameSort(nameSorts);
   }, [number, sort, name, pageS, totalPage]);
 
-  console.log("sort: ", sort);
+  console.log("Number: ", number);
 
   return (
     <>
@@ -428,163 +439,190 @@ const HomeSection = () => {
           {loadingProducts ? (
             <LoadingProducts top="40%" />
           ) : (
-            <div className="w-[100%] grid grid-cols-3 gap-[20px] p-2 mt-[20px] z-[2]">
-              {/* san pham 1 */}
-              {products.map((product, i) => {
-                return (
-                  <>
-                    <div
-                      key={product._id}
-                      className="w-[70%] shadow-md rounded-[3px] bg-white border-r-[2px] border-gray-200 p-3
+            <>
+              {products.length > 0 ? (
+                <>
+                  <div className="w-[100%] grid grid-cols-3 gap-[20px] p-2 mt-[20px] z-[2]">
+                    {/* san pham 1 */}
+                    {products.map((product, i) => {
+                      return (
+                        <>
+                          <div
+                            key={product._id}
+                            className="w-[70%] shadow-md rounded-[3px] bg-white border-r-[2px] border-gray-200 p-3
           cursor-pointer relative group"
-                    >
-                      <span
-                        className="flex justify-center text-[13px] font-[600] cursor-default
+                          >
+                            <span
+                              className="flex justify-center text-[13px] font-[600] cursor-default
             pb-[6px]"
-                      >
-                        {product.category}
-                      </span>
-                      <h2 className="text-center font-[700] pb-[6px]">
-                        {product.name}
-                      </h2>
-                      <span>
-                        <img
-                          src={product.image}
-                          className="w-[100%]"
-                          onClick={() =>
-                            nagivate(
-                              `/san-pham-chi-tiet?name=${product.name}`,
-                              {
-                                state: { id: product._id },
-                              }
-                            )
-                          }
-                        />
-                      </span>
-                      <div className="flex justify-center items-center">
-                        <span className="text-[17px] text-green-600 font-[500] pr-[6px]">
-                          {numberFormat.format(
-                            (product.price * (100 - product.discount)) / 100
-                          )}
-                        </span>
-                        <span className="text-gray-400 text-[14px] pr-[6px]">
-                          {numberFormat.format(product.price)}
-                        </span>
-                        <span
-                          className="p-1 bg-red-600 text-white text-[15px] font-[650]
+                            >
+                              {product.category}
+                            </span>
+                            <h2 className="text-center font-[700] pb-[6px]">
+                              {product.name}
+                            </h2>
+                            <span>
+                              <img
+                                src={product.image}
+                                className="w-[100%]"
+                                onClick={() =>
+                                  nagivate(
+                                    `/san-pham-chi-tiet?name=${product.name}`,
+                                    {
+                                      state: { id: product._id },
+                                    }
+                                  )
+                                }
+                              />
+                            </span>
+                            <div className="flex justify-center items-center">
+                              <span className="text-[17px] text-green-600 font-[500] pr-[6px]">
+                                {numberFormat.format(
+                                  (product.price * (100 - product.discount)) /
+                                    100
+                                )}
+                              </span>
+                              <span className="text-gray-400 text-[14px] pr-[6px]">
+                                {numberFormat.format(product.price)}
+                              </span>
+                              <span
+                                className="p-1 bg-red-600 text-white text-[15px] font-[650]
               rounded-[4px]"
-                        >
-                          {product.discount}%
-                        </span>
-                      </div>
-                      {/* menu mini san pham*/}
-                      <div
-                        className="absolute  bg-white shadow-md w-[30%] p-1 top-[53%] left-[35%]
+                              >
+                                {product.discount}%
+                              </span>
+                            </div>
+                            {/* menu mini san pham*/}
+                            <div
+                              className="absolute  bg-white shadow-md w-[30%] p-1 top-[53%] left-[35%]
             rounded-[3px] group-hover:opacity-100 duration-[0.5s] group-hover:top-[50%] 
             opacity-0 invisible group-hover:visible "
-                      >
-                        <ul className="grid grid-cols-2 p-1 w-[100%] items-center">
-                          <li className="border-r-[2px] border-gray-200 p-2">
-                            <span
-                              className="cursor-pointer hover:text-green-600 duration-[0.5s]"
-                              onClick={() =>
-                                addListCarts(
-                                  product._id,
-                                  (product.price * (100 - product.discount)) /
-                                    100,
-                                  1,
-                                  ((product.price * (100 - product.discount)) /
-                                    100) *
-                                    1
-                                )
-                              }
                             >
-                              <FaCartPlus size="14px" />
-                            </span>
-                          </li>
-                          <li className="flex justify-center">
-                            <span
-                              className={` ${
-                                listLove.some((i) => i._id === product._id)
-                                  ? "text-green-500"
-                                  : ""
-                              } hover:text-green-600 duration-[0.5s]`}
-                              onClick={() =>
-                                listLove.some((i) => i._id === product._id)
-                                  ? deleteLove(product._id)
-                                  : addListLoves(product._id)
-                              }
-                            >
-                              <FaHeartCirclePlus size="14px" />
-                            </span>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </>
-                );
-              })}
-            </div>
+                              <ul className="grid grid-cols-2 p-1 w-[100%] items-center">
+                                <li className="border-r-[2px] border-gray-200 p-2">
+                                  <span
+                                    className="cursor-pointer hover:text-green-600 duration-[0.5s]"
+                                    onClick={() =>
+                                      addListCarts(
+                                        product._id,
+                                        (product.price *
+                                          (100 - product.discount)) /
+                                          100,
+                                        1,
+                                        ((product.price *
+                                          (100 - product.discount)) /
+                                          100) *
+                                          1
+                                      )
+                                    }
+                                  >
+                                    <FaCartPlus size="14px" />
+                                  </span>
+                                </li>
+                                <li className="flex justify-center">
+                                  <span
+                                    className={` ${
+                                      listLove.some(
+                                        (i) => i._id === product._id
+                                      )
+                                        ? "text-green-500"
+                                        : ""
+                                    } hover:text-green-600 duration-[0.5s]`}
+                                    onClick={() =>
+                                      listLove.some(
+                                        (i) => i._id === product._id
+                                      )
+                                        ? deleteLove(product._id)
+                                        : addListLoves(product._id)
+                                    }
+                                  >
+                                    <FaHeartCirclePlus size="14px" />
+                                  </span>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-center items-center p-[20px]">
+                    <h3 className="text-[22px] font-[600] uppercase ">
+                      Không có sản phẩm nào !
+                    </h3>
+                  </div>
+                </>
+              )}
+            </>
           )}
 
           {/* phan trang */}
-          <div
-            className="bg-white border-[2px] border-gray-200 rounded-[2px] w-[100%]  
+          {products.length > 0 ? (
+            <>
+              <div
+                className="bg-white border-[2px] border-gray-200 rounded-[2px] w-[100%]  
         mt-[40px] flex items-center justify-center relative"
-          >
-            <span
-              className={`buton-pagin ${
-                parseInt(number) === 1
-                  ? "opacity-0 invisible"
-                  : "opcity-100 visible"
-              }`}
-              onClick={fcFirstPage}
-            >
-              <MdSkipNext size="20px" className="rotate-[180deg]" />
-            </span>
-            <span
-              className={`buton-pagin ${
-                parseInt(number) === 1
-                  ? "opacity-0 invisible"
-                  : "opcity-100 visible"
-              }`}
-              onClick={fcBtLastPage}
-            >
-              <MdNavigateNext size="20px" className="rotate-[180deg]" />
-            </span>
-            {pages.map((i, idx) => {
-              return (
+              >
                 <span
-                  key={idx}
-                  className={`text-[18px] buton-pagin font-[500]
-                ${i === parseInt(number) ? "button-active " : ""}`}
-                  onClick={() => fcSetNumber(i)}
+                  className={`buton-pagin ${
+                    parseInt(number) === 1
+                      ? "opacity-0 invisible"
+                      : "opcity-100 visible"
+                  }`}
+                  onClick={fcFirstPage}
                 >
-                  {i}
+                  <MdSkipNext size="20px" className="rotate-[180deg]" />
                 </span>
-              );
-            })}
-            <span
-              className={`buton-pagin ${
-                parseInt(number) === totalPage
-                  ? "opacity-0 invisible"
-                  : "opcity-100 visible"
-              }`}
-              onClick={fcBtNextPage}
-            >
-              <MdNavigateNext size="20px" />
-            </span>
-            <span
-              className={`buton-pagin ${
-                parseInt(number) === totalPage
-                  ? "opacity-0 invisible"
-                  : "opcity-100 visible"
-              }`}
-              onClick={fcLastPage}
-            >
-              <MdSkipNext size="20px" />
-            </span>
-          </div>
+                <span
+                  className={`buton-pagin ${
+                    parseInt(number) === 1
+                      ? "opacity-0 invisible"
+                      : "opcity-100 visible"
+                  }`}
+                  onClick={fcBtLastPage}
+                >
+                  <MdNavigateNext size="20px" className="rotate-[180deg]" />
+                </span>
+                {pages.map((i, idx) => {
+                  return (
+                    <span
+                      key={idx}
+                      className={`text-[18px] buton-pagin font-[500]
+                ${i === parseInt(number) ? "button-active " : ""}`}
+                      onClick={() => fcSetNumber(i)}
+                    >
+                      {i}
+                    </span>
+                  );
+                })}
+                <span
+                  className={`buton-pagin ${
+                    parseInt(number) === totalPage
+                      ? "opacity-0 invisible"
+                      : "opcity-100 visible"
+                  }`}
+                  onClick={fcBtNextPage}
+                >
+                  <MdNavigateNext size="20px" />
+                </span>
+                <span
+                  className={`buton-pagin ${
+                    parseInt(number) === totalPage
+                      ? "opacity-0 invisible"
+                      : "opcity-100 visible"
+                  }`}
+                  onClick={fcLastPage}
+                >
+                  <MdSkipNext size="20px" />
+                </span>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       </div>
     </>

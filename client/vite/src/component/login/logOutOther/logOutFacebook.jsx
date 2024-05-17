@@ -19,6 +19,7 @@ const LogOutFacebook = () => {
       window.localStorage.removeItem("pageSize");
       window.localStorage.removeItem("counts");
       window.sessionStorage.removeItem("active");
+      window.localStorage.removeItem("sort");
       navigate("/dang-nhap");
       window.location.reload()
     } catch (error) {
