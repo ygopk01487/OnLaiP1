@@ -332,8 +332,6 @@ const HomeSection = () => {
     if (nameSorts) setNameSort(nameSorts);
   }, [number, sort, name, pageS, totalPage]);
 
-  console.log("Number: ", number);
-
   return (
     <>
       {/* <Toast checkToast={checkToast} mess={mess} /> */}
