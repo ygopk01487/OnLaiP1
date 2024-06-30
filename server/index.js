@@ -9,6 +9,7 @@ const listLoveRouter = require("./router/listLove");
 const cartRouter = require("./router/listCart");
 const reviewRouter = require("./router/reviews");
 const ordersProducts = require("./router/order");
+const replyComments = require("./router/replys");
 
 const { Server } = require("socket.io");
 const http = require("http");
@@ -28,6 +29,7 @@ app.use("/listLove", listLoveRouter);
 app.use("/listCart", cartRouter);
 app.use("/reviews", reviewRouter);
 app.use("/orders", ordersProducts);
+app.use("/replys", replyComments);
 
 const PORT = process.env.PORT;
 
@@ -35,7 +37,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "https://bansach.netlify.app",
+    origin: "http://localhost:5173",
   },
 });
 
@@ -47,6 +49,10 @@ io.on("connection", (socket) => {
 
   socket.on("loadCart", (data) => {
     io.emit("load", data);
+  });
+
+  socket.on("loadReply", (data, idRvs) => {
+    io.emit("load_Reply", data.data, idRvs);
   });
 });
 

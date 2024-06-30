@@ -7,7 +7,11 @@ const getAllReview = async (req, res) => {
       .find()
       .populate("review.user")
       .populate("review.userOther")
-      .populate("product");
+      .populate("product")
+      .populate("review.like.user")
+      .populate("review.like.userOther")
+      .populate("review.dislike.user")
+      .populate("review.dislike.userOther");
 
     res
       .status(200)
@@ -35,7 +39,11 @@ const getByIdPro = async (req, res) => {
       .findOne({ product })
       .populate("review.user")
       .populate("review.userOther")
-      .populate("product");
+      .populate("product")
+      .populate("review.like.user")
+      .populate("review.like.userOther")
+      .populate("review.dislike.user")
+      .populate("review.dislike.userOther");
 
     if (!data) {
       return res.status(202).json({
@@ -108,7 +116,11 @@ const addReviews = async (req, res) => {
         .findOne({ product })
         .populate("product")
         .populate("review.user")
-        .populate("review.userOther");
+        .populate("review.userOther")
+        .populate("review.like.user")
+        .populate("review.like.userOther")
+        .populate("review.dislike.user")
+        .populate("review.dislike.userOther");
 
       return res
         .status(200)
@@ -129,13 +141,21 @@ const addReviews = async (req, res) => {
       })
       .populate("product")
       .populate("review.user")
-      .populate("review.userOther");
+      .populate("review.userOther")
+      .populate("review.like.user")
+      .populate("review.like.userOther")
+      .populate("review.dislike.user")
+      .populate("review.dislike.userOther");
 
     const dataCms = await reviews
       .findOne({ product })
       .populate("product")
       .populate("review.user")
-      .populate("review.userOther");
+      .populate("review.userOther")
+      .populate("review.like.user")
+      .populate("review.like.userOther")
+      .populate("review.dislike.user")
+      .populate("review.dislike.userOther");
 
     return res
       .status(200)
@@ -170,7 +190,11 @@ const editReviews = async (req, res) => {
       .findById(id)
       .populate("product")
       .populate("review.user")
-      .populate("review.userOther");
+      .populate("review.userOther")
+      .populate("review.like.user")
+      .populate("review.like.userOther")
+      .populate("review.dislike.user")
+      .populate("review.dislike.userOther");
 
     res.status(200).json({
       success: true,
@@ -205,7 +229,11 @@ const deleteCommnet = async (req, res) => {
       .findById(id)
       .populate("product")
       .populate("review.user")
-      .populate("review.userOther");
+      .populate("review.userOther")
+      .populate("review.like.user")
+      .populate("review.like.userOther")
+      .populate("review.dislike.user")
+      .populate("review.dislike.userOther");
 
     res.status(200).json({
       success: true,
@@ -230,7 +258,11 @@ const deleteReviews = async (req, res) => {
       .findByIdAndDelete(id)
       .populate("product")
       .populate("review.user")
-      .populate("review.userOther");
+      .populate("review.userOther")
+      .populate("review.like.user")
+      .populate("review.like.userOther")
+      .populate("review.dislike.user")
+      .populate("review.dislike.userOther");
 
     res.status(200).json({
       success: true,
@@ -244,6 +276,270 @@ const deleteReviews = async (req, res) => {
   }
 };
 
+//add like
+const addLike = async (req, res) => {
+  const { userOther, user, like, idCm, id } = req.body;
+  if (like === "" || id == "" || idCm === "") {
+    return res.status(400).json({ success: false, message: "not null" });
+  }
+  try {
+    let data = await reviews
+      .findById(id)
+      .populate("product")
+      .populate("review.user")
+      .populate("review.userOther")
+      .populate("review.like.user")
+      .populate("review.like.userOther")
+      .populate("review.dislike.user")
+      .populate("review.dislike.userOther");
+
+    let indexUserCm = data.review
+      .map((i) => i)
+      .findIndex((i) => i._id.toString() === idCm);
+
+    let userCm = data.review[indexUserCm];
+    // console.log(userCm);
+
+    // console.log(userCm.like.filter((i) => i.user?._id.toString() === user));
+
+    //kiem tra neu like length < 0
+    if (userCm.like.length === 0) {
+      userCm.like.push({
+        user: user,
+        userOther: userOther,
+        countLike: like,
+      });
+      await data.save();
+      data = await reviews
+        .findById(id)
+        .populate("product")
+        .populate("review.user")
+        .populate("review.userOther")
+        .populate("review.like.user")
+        .populate("review.like.userOther")
+        .populate("review.dislike.user")
+        .populate("review.dislike.userOther");
+    } else {
+      let getIdLike;
+      let userLike;
+      if (user) {
+        userLike = userCm.like.filter((i) => i.user?._id.toString() === user);
+      } else {
+        userLike = userCm.like.filter(
+          (i) => i.userOther?._id.toString() === userOther
+        );
+      }
+
+      //kiem tra neu da like thi` tru di gnuoc thi them
+      if (userLike.length > 0) {
+        getIdLike = userLike[0]._id;
+        data = await reviews.findByIdAndUpdate(
+          id,
+          {
+            $pull: {
+              "review.$[].like": { _id: getIdLike },
+            },
+          },
+          { new: true }
+        );
+        data = await reviews
+          .findById(id)
+          .populate("product")
+          .populate("review.user")
+          .populate("review.userOther")
+          .populate("review.like.user")
+          .populate("review.like.userOther")
+          .populate("review.dislike.user")
+          .populate("review.dislike.userOther");
+      } else {
+        userCm.like.push({
+          user: user,
+          userOther: userOther,
+          countLike: like,
+        });
+        await data.save();
+        data = await reviews
+          .findById(id)
+          .populate("product")
+          .populate("review.user")
+          .populate("review.userOther")
+          .populate("review.like.user")
+          .populate("review.like.userOther")
+          .populate("review.dislike.user")
+          .populate("review.dislike.userOther");
+      }
+    }
+    res
+      .status(200)
+      .json({ success: true, data: data, message: "add like true" });
+  } catch (error) {
+    return res.status(404).json({ success: false, message: "add like fail" });
+  }
+};
+
+//add dislike
+const addDislike = async (req, res) => {
+  const { userOther, user, disLikes, idCm, id } = req.body;
+  if (disLikes === "" || id == "" || idCm === "") {
+    return res.status(400).json({ success: false, message: "not null" });
+  }
+  try {
+    let data = await reviews
+      .findById(id)
+      .populate("product")
+      .populate("review.user")
+      .populate("review.userOther")
+      .populate("review.like.user")
+      .populate("review.like.userOther")
+      .populate("review.dislike.user")
+      .populate("review.dislike.userOther");
+
+    let indexUserCm = data.review
+      .map((i) => i)
+      .findIndex((i) => i._id.toString() === idCm);
+
+    let userCm = data.review[indexUserCm];
+
+    //kiem tra neu like length < 0
+    if (userCm.dislike.length === 0) {
+      userCm.dislike.push({
+        user: user,
+        userOther: userOther,
+        countDislike: disLikes,
+      });
+      await data.save();
+      data = await reviews
+        .findById(id)
+        .populate("product")
+        .populate("review.user")
+        .populate("review.userOther")
+        .populate("review.like.user")
+        .populate("review.like.userOther")
+        .populate("review.dislike.user")
+        .populate("review.dislike.userOther");
+    } else {
+      let userdislike;
+      let getIddislike;
+      if (user) {
+        userdislike = userCm.dislike.filter(
+          (i) => i.user?._id.toString() === user
+        );
+      } else {
+        userdislike = userCm.dislike.filter(
+          (i) => i.userOther?._id.toString() === userOther
+        );
+      }
+
+      //kiem tra neu da dislike thi` tru di gnuoc thi them
+      if (userdislike.length > 0) {
+        getIddislike = userdislike[0]._id;
+
+        data = await reviews.findByIdAndUpdate(
+          id,
+          {
+            $pull: {
+              "review.$[].dislike": { _id: getIddislike },
+            },
+          },
+          { new: true }
+        );
+        data = await reviews
+          .findById(id)
+          .populate("product")
+          .populate("review.user")
+          .populate("review.userOther")
+          .populate("review.like.user")
+          .populate("review.like.userOther")
+          .populate("review.dislike.user")
+          .populate("review.dislike.userOther");
+      } else {
+        userCm.dislike.push({
+          user: user,
+          userOther: userOther,
+          countDislike: disLikes,
+        });
+        await data.save();
+        data = await reviews
+          .findById(id)
+          .populate("product")
+          .populate("review.user")
+          .populate("review.userOther")
+          .populate("review.like.user")
+          .populate("review.like.userOther")
+          .populate("review.dislike.user")
+          .populate("review.dislike.userOther");
+      }
+    }
+    res
+      .status(200)
+      .json({ success: true, data: data, message: "add dis like true" });
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ success: false, message: "add dislike fail" });
+  }
+};
+
+//remove like
+const removeLike = async (req, res) => {
+  const { id } = req.params;
+  const { idLike } = req.body;
+  if (id === "" || idLike === "") {
+    return res.status(400).json({ success: false, message: "not null" });
+  }
+  try {
+    const data = await reviews.findOneAndUpdate(
+      {
+        "review._id": id,
+      },
+      {
+        $pull: {
+          "review.$[].like": { _id: idLike },
+        },
+      },
+      { new: true }
+    );
+
+    res
+      .status(200)
+      .json({ success: true, data: data, message: "delete disliek true" });
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ success: false, message: "delete dislike fail" });
+  }
+};
+
+//remove dislike
+const removeDislike = async (req, res) => {
+  const { id } = req.params;
+  const { idDisLike } = req.body;
+  if (id === "" || idDisLike === "") {
+    return res.status(400).json({ success: false, message: "not null" });
+  }
+  try {
+    const data = await reviews.findOneAndUpdate(
+      {
+        "review._id": id,
+      },
+      {
+        $pull: {
+          "review.$[].dislike": { _id: idDisLike },
+        },
+      },
+      { new: true }
+    );
+
+    res
+      .status(200)
+      .json({ success: true, data: data, message: "delete disliek true" });
+  } catch (error) {
+    return res
+      .status(404)
+      .json({ success: false, message: "delete dislike fail" });
+  }
+};
+
 module.exports = {
   getAllReview,
   getByIdPro,
@@ -251,4 +547,8 @@ module.exports = {
   editReviews,
   deleteCommnet,
   deleteReviews,
+  addLike,
+  addDislike,
+  removeLike,
+  removeDislike,
 };
