@@ -15,3 +15,15 @@ export const editRv = (star, comment, id, idComment) =>
 
 export const deleteComment = (id, idComment) =>
   API.put(`/reviews/deleteComment`, { id, idComment });
+
+export const addLike = (user, userOther, id, idCm, like) =>
+  API.post(`/reviews/addLikes`, { user, userOther, id, idCm, like });
+
+export const addDisLike = (user, userOther, id, idCm, disLikes) =>
+  API.post(`/reviews/addDislikes`, { user, userOther, id, idCm, disLikes });
+
+export const removeLike = (idCm, idLike) =>
+  API.put(`/reviews/deleteLike/${idCm}`, { idLike });
+
+export const removeDisLike = (idCm, idDisLike) =>
+  API.put(`/reviews/deleteDislike/${idCm}`, { idDisLike });

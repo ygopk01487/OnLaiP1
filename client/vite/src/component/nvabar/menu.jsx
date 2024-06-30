@@ -48,6 +48,8 @@ const Menu = () => {
 
   const [loadCart, setLoadCart] = useState("");
 
+  const [notSpam, setNotSpam] = useState(false);
+
   //typing placeholder
   const [placeholder, setPlaceholder] = useState("");
   const textPlaceholder = "Tìm kiếm theo tên sách...";
@@ -142,9 +144,11 @@ const Menu = () => {
 
   //delete pro cart
   const deleteCartPro = async (product) => {
+    setNotSpam(true);
     const data = await deleteListProCart(idProCar, product);
     if (data) {
       getByUserCarts();
+      setNotSpam(false);
       alert("xoa thanh cong");
       socket.emit("loadCart", data);
     } else {
@@ -410,9 +414,9 @@ const Menu = () => {
                     </div>
                     {/* xoa */}
                     <span
-                      className="w-[20px] h-[20px] bg-gray-400 text-white flex items-center justify-center 
+                      className={`w-[20px] h-[20px] bg-gray-400 text-white flex items-center justify-center 
   rounded-[3px] hover:opacity-[0.4] duration-[0.5s] hover:text-black
-  mt-[16%]"
+  mt-[16%] ${notSpam ? "pointer-events-none" : "pointer-events-auto"}`}
                       onClick={() => deleteCartPro(i.productId._id)}
                     >
                       <IoClose size="14px" />

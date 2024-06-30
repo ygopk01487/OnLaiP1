@@ -127,25 +127,15 @@ const CheckOut = () => {
   const addOrders = async () => {
     const userOther = JSON.parse(window.sessionStorage.getItem("user"));
 
-    let { checkCountry, checkAdd, checkNote, checkPhone } = checkOrderPro();
+    let { checkCountry, checkAdd, checkPhone } = checkOrderPro();
 
-    if (
-      checkCountry === false ||
-      checkAdd === false ||
-      checkNote === false ||
-      checkPhone === false
-    ) {
-      clearTextCheck({ checkCountry, checkAdd, checkNote, checkPhone });
+    if (checkCountry === false || checkAdd === false || checkPhone === false) {
+      clearTextCheck({ checkCountry, checkAdd, checkPhone });
     }
-    console.log(checkCountry, checkAdd, checkNote, checkPhone);
+    // console.log(checkCountry, checkAdd, checkPhone);
 
-    if (
-      checkCountry === true &&
-      checkAdd === true &&
-      checkNote === true &&
-      checkPhone === true
-    ) {
-      clearTextCheck({ checkCountry, checkAdd, checkNote, checkPhone });
+    if (checkCountry === true && checkAdd === true && checkPhone === true) {
+      clearTextCheck({ checkCountry, checkAdd, checkPhone });
       // setCheckValueOrder(true);
       let datas;
 
@@ -198,6 +188,7 @@ const CheckOut = () => {
     let checkAdd = "";
     let checkPhone = "";
     let checkNote = "";
+    let regexPhoneNumber = /(0[35789])+([0-9]{8})\b/g;
 
     if (data.country.trim() === "") {
       setPCountry("Không được bỏ trống !");
@@ -221,35 +212,29 @@ const CheckOut = () => {
     if (data.phone.trim() === "") {
       setPPhone("Không được bỏ trống !");
       checkPhone = false;
-    } else if (data.phone.length < 10 || data.phone.length > 10) {
-      setPPhone("Độ dài số sai !");
-      checkPhone = false;
+    } else if (!data.phone.match(regexPhoneNumber)) {
+      setPPhone("Số diện thoại không hợp lệ");
     } else {
       setPPhone("");
       checkPhone = true;
     }
 
-    if (data.notes.trim() === "") {
-      setPNotes("Không được bỏ trống !");
-      checkNote = false;
-    } else if (data.notes.length < 5) {
-      setPNotes("Quá ngắn !");
-      checkNote = false;
-    } else {
-      setPNotes("");
-      checkNote = true;
-    }
+    // if (data.notes.trim() === "") {
+    //   setPNotes("Không được bỏ trống !");
+    //   checkNote = false;
+    // } else if (data.notes.length < 5) {
+    //   setPNotes("Quá ngắn !");
+    //   checkNote = false;
+    // } else {
+    //   setPNotes("");
+    //   checkNote = true;
+    // }
 
-    return { checkCountry, checkAdd, checkNote, checkPhone };
+    return { checkCountry, checkAdd, checkPhone };
   };
 
   //clear text check
-  const clearTextCheck = ({
-    checkCountry,
-    checkAdd,
-    checkNote,
-    checkPhone,
-  }) => {
+  const clearTextCheck = ({ checkCountry, checkAdd, checkPhone }) => {
     if (checkCountry === true) {
       setPCountry("");
     } else {
@@ -262,11 +247,11 @@ const CheckOut = () => {
       setData({ ...data, address: "" });
     }
 
-    if (checkNote === true) {
-      setPNotes("");
-    } else {
-      setData({ ...data, notes: "" });
-    }
+    // if (checkNote === true) {
+    //   setPNotes("");
+    // } else {
+    //   setData({ ...data, notes: "" });
+    // }
 
     if (checkPhone === true) {
       setPPhone("");

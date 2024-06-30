@@ -8,6 +8,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { getALl, getByUserLove, removeProLove } from "../../action/listLove";
 import { getByUser, refreshTK } from "../../action/users";
 import LoadingProducts from "../loading/loadingProducts";
+import { numberFormat } from "../productDetail/ProductDetail";
 
 const ListLove = () => {
   const nagivate = useNavigate();
@@ -18,6 +19,8 @@ const ListLove = () => {
   const [idList, setIdList] = useState("");
 
   const [loadingPro, setLoadingPro] = useState(false);
+
+  const [notSpam, setNotSpam] = useState(false);
 
   const navigate = useNavigate();
 
@@ -44,8 +47,13 @@ const ListLove = () => {
   };
 
   const deleleProductListLove = async (id) => {
-    await removeProLove(idList, id);
-    getUserListLove();
+    console.log("hello");
+    setNotSpam(true);
+    const data = await removeProLove(idList, id);
+    if (data) {
+      setNotSpam(false);
+      getUserListLove();
+    }
   };
 
   //rf token
@@ -163,12 +171,19 @@ const ListLove = () => {
                               </td>
                               <td className="border-tbody-listLove">
                                 <span className="flex items-center justify-center text-[16px]">
-                                  {(i.price * (100 - i.discount)) / 100}
+                                  {numberFormat.format(
+                                    (i.price * (100 - i.discount)) / 100
+                                  )}
                                 </span>
                               </td>
                               <td className="border-tbody-listLove">
                                 <span
-                                  className="flex items-center justify-center cursor-pointer text-hover-listLove"
+                                  className={`flex items-center justify-center cursor-pointer text-hover-listLove
+                                    ${
+                                      notSpam
+                                        ? "pointer-events-none"
+                                        : "pointer-events-auto"
+                                    }`}
                                   onClick={() => deleleProductListLove(i._id)}
                                 >
                                   <IoMdHeartDislike size="20px" />

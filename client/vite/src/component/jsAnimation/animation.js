@@ -15,7 +15,10 @@ export const ScrollMenu = () => {
 
 //back to top
 export const backToTOp = () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
 };
 
 //back to review

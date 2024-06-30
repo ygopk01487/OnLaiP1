@@ -6,7 +6,7 @@
     @apply p-0 m-0 box-border;
   }
   body {
-    @apply bg-slate-100 overflow-x-hidden;
+    @apply bg-slate-100 overflow-x-hidden  scroll-smooth;
   }
 }
 
@@ -41,7 +41,7 @@
 
   /* back to top */
   #back.show {
-    @apply visible opacity-100 duration-[0.5s] right-[3%];
+    @apply visible opacity-100 right-[3%];
   }
 
   /* home section */
@@ -171,4 +171,7 @@ rounded-[3px] text-[14px] font-[500];
     @apply outline-none pl-[25px] p-[10px] w-[100%] rounded-[3px] border-[2px] border-gray-200
     focus:border-green-600 mb-[10px];
   }
+
+  /* product dettail */
+
 }

@@ -1,4 +1,13 @@
-import { addRv, deleteComment, editRv, getRvById } from "../api/reviews";
+import {
+  addDisLike,
+  addLike,
+  addRv,
+  deleteComment,
+  editRv,
+  getRvById,
+  removeDisLike,
+  removeLike,
+} from "../api/reviews";
 
 export const getReviewById = async (product) => {
   try {
@@ -33,5 +42,41 @@ export const deleteCm = async (id, idComment) => {
     return data.deleteComment;
   } catch (error) {
     console.log("get review by id fail");
+  }
+};
+
+export const addLikes = async (user, userOther, id, idCm, like) => {
+  try {
+    const { data } = await addLike(user, userOther, id, idCm, like);
+    return data.data;
+  } catch (error) {
+    console.log("add like fail");
+  }
+};
+
+export const addDisLikes = async (user, userOther, id, idCm, disLikes) => {
+  try {
+    const { data } = await addDisLike(user, userOther, id, idCm, disLikes);
+    return data.data;
+  } catch (error) {
+    console.log("add dis like fail");
+  }
+};
+
+export const removeLikes = async (idCm, idLike) => {
+  try {
+    const { data } = await removeLike(idCm, idLike);
+    return data;
+  } catch (error) {
+    console.log("remove like fail");
+  }
+};
+
+export const removeDislikes = async (idCm, idDisLike) => {
+  try {
+    const { data } = await removeDisLike(idCm, idDisLike);
+    return data;
+  } catch (error) {
+    console.log("remvoew dis liek ffail");
   }
 };
