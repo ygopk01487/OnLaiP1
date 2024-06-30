@@ -20,7 +20,7 @@ import { BiSolidDislike } from "react-icons/bi";
 import { FaAngleDown } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
 
-export const socket = io.connect("http://localhost:5000");
+export const socket = io.connect("https://storebook-api.onrender.com");
 
 export const numberFormat = new Intl.NumberFormat("de-DE", {
   style: "currency",
