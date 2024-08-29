@@ -654,9 +654,11 @@ const ProductDetail = () => {
     idReviewUser,
     checkReply
   ) => {
-    // setNotSpam(true);
+    setNotSpam(true);
     const userOther = JSON.parse(window.sessionStorage.getItem("user"));
     let data;
+    console.log("thuong", users);
+    console.log("other", userOthers);
 
     if (!userOther) {
       data = await addReplys(
@@ -720,6 +722,7 @@ const ProductDetail = () => {
       getReplysByComments();
       setNotSpam(false);
       setEditReply(false);
+      setIdCommentReply("");
       socket.emit("loadReply", data, idRv);
     }
   };
@@ -753,14 +756,16 @@ const ProductDetail = () => {
     let data;
     //get data theo comment
     const dataByCm = dataRePly.filter((i) => i.idComment.idReviewUser === idCm);
+
     if (!userOther) {
       //kiem tra neu user da dislike khi bam like thi xoa di
-      const datas = dataByCm[0].replyss
-        .map((i) => i.dislike)[0]
-        .filter((i) => i.userOther.toString() === idUserOther);
-
-      if (datas.length > 0) {
-        const idDislike = datas[0]._id;
+      let a = dataByCm[0].replyss;
+      let dislikeUser;
+      for (let i of a) {
+        dislikeUser = i?.dislike.filter((t) => t.user === idUser);
+      }
+      if (dislikeUser.length > 0) {
+        const idDislike = dislikeUser[0]._id;
         if (idDislike) {
           await removeDislikeReplys(idRl, idDislike);
         }
@@ -771,12 +776,16 @@ const ProductDetail = () => {
       data = await addLikeReplys(idUser, null, id, idRl, 1, idRv);
     } else {
       //kiem tra neu user da dislike khi bam like thi xoa di
-      const datas = dataByCm[0].replyss
-        .map((i) => i.dislike)[0]
-        .filter((i) => i.userOther === idUserOther);
+      let a = dataByCm[0].replyss;
+      let dislikeUserOther;
+      for (let i of a) {
+        dislikeUserOther = i?.dislike.filter(
+          (t) => t.userOther.toString() === idUserOther
+        );
+      }
 
-      if (datas.length > 0) {
-        const idDislike = datas[0]._id;
+      if (dislikeUserOther.length > 0) {
+        const idDislike = dislikeUserOther[0]._id;
         if (idDislike) {
           await removeDislikeReplys(idRl, idDislike);
         }
@@ -802,12 +811,14 @@ const ProductDetail = () => {
     const dataByCm = dataRePly.filter((i) => i.idComment.idReviewUser === idCm);
     if (!userOther) {
       //kiem tra neu user da like khi bam like thi xoa di
-      const datas = dataByCm[0].replyss
-        .map((i) => i.like)[0]
-        .filter((i) => i.userOther.toString() === idUserOther);
+      let a = dataByCm[0].replyss;
+      let likeUser;
+      for (let i of a) {
+        likeUser = i?.like.filter((t) => t.user === idUser);
+      }
 
-      if (datas.length > 0) {
-        const idLike = datas[0]._id;
+      if (likeUser.length > 0) {
+        const idLike = likeUser[0]._id;
         if (idLike) {
           await removeLikeReplys(idRl, idLike);
         }
@@ -818,16 +829,21 @@ const ProductDetail = () => {
       data = await addDislikeReplys(idUser, null, id, idRl, 1, idRv);
     } else {
       //kiem tra neu user da like khi bam like thi xoa di
-      const datas = dataByCm[0].replyss
-        .map((i) => i.like)[0]
-        .filter((i) => i.userOther.toString() === idUserOther);
+      let a = dataByCm[0].replyss;
+      let likeUserOther;
+      for (let i of a) {
+        likeUserOther = i?.like.filter(
+          (t) => t.userOther.toString() === idUserOther
+        );
+      }
 
-      if (datas.length > 0) {
-        const idLike = datas[0]._id;
+      if (likeUserOther.length > 0) {
+        const idLike = likeUserOther[0]._id;
         if (idLike) {
           await removeLikeReplys(idRl, idLike);
         }
       }
+
       const id = dataByCm[0]._id;
       data = await addDislikeReplys(null, idUserOther, id, idRl, 1, idRv);
     }
@@ -1141,7 +1157,7 @@ const ProductDetail = () => {
                     <span
                       className={`icon-add-remove-carts ${
                         numberPro >= 10
-                          ? "pointer-envets-none"
+                          ? "pointer-events-none"
                           : "pointer-events-auto"
                       }`}
                       onClick={() => setNumberPro(numberPro + 1)}
@@ -1733,7 +1749,7 @@ const ProductDetail = () => {
                                               a.replyUserOther?._id !==
                                                 a.receverUserOther?._id) && (
                                               <>
-                                                <span className="text-[15px] font-[550] text-blue-600 absolute bottom-[15%]">
+                                                <span className="text-[15px] font-[550] text-blue-600 absolute bottom-[14%]">
                                                   @
                                                   {a.receverUser?.name ||
                                                     a.receverUserOther?.name}
@@ -1768,12 +1784,34 @@ const ProductDetail = () => {
                                                   a.receverUserOther?._id !==
                                                     a.replyUserOther?._id &&
                                                   a.receverUserOther?.name
+                                                    .length >= 10 &&
+                                                  a.receverUserOther?.name
                                                     .length - 2.5) ||
+                                                (a.checkReply === "true" &&
+                                                  a.receverUserOther?._id !==
+                                                    a.replyUserOther?._id &&
+                                                  a.receverUserOther?.name
+                                                    .length < 10 &&
+                                                  a.receverUserOther?.name
+                                                    .length >= 0 &&
+                                                  a.receverUserOther?.name
+                                                    .length - 0) ||
                                                 (a.checkReply === "true" &&
                                                   a.receverUser?._id !==
                                                     a.replyUser?._id &&
+                                                  a.receverUser?.name.length >=
+                                                    10 &&
                                                   a.receverUser?.name.length -
-                                                    2.5)
+                                                    2.5) ||
+                                                (a.checkReply === "true" &&
+                                                  a.receverUser?._id !==
+                                                    a.replyUser?._id &&
+                                                  a.receverUser?.name.length <
+                                                    10 &&
+                                                  a.receverUser?.name.length >=
+                                                    0 &&
+                                                  a.receverUser?.name.length -
+                                                    0)
                                               }%)`,
                                             }}
                                           />
@@ -1805,6 +1843,7 @@ const ProductDetail = () => {
                                                 <span
                                                   className="flex items-center pr-[12px]"
                                                   onClick={() =>
+                                                    !notSpam &&
                                                     addLikeReplysss(
                                                       a._id,
                                                       i._id
@@ -1839,6 +1878,7 @@ const ProductDetail = () => {
                                                 <span
                                                   className="pr-[12px] flex items-center"
                                                   onClick={() =>
+                                                    !notSpam &&
                                                     addDisikeReplysss(
                                                       a._id,
                                                       i._id
@@ -2135,7 +2175,7 @@ const ProductDetail = () => {
                                   `}
                                               onClick={() =>
                                                 addReplysssss(
-                                                  a.receverUser?._id,
+                                                  a.replyUser?._id,
                                                   a.replyUserOther?._id,
                                                   idRv,
                                                   i._id,

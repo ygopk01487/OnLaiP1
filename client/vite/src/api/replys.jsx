@@ -82,5 +82,5 @@ export const addDislikeReply = (
 export const removeLikeReply = (idReply, idLike) =>
   API.put(`/replys/removeLikeReply/${idReply}`, { idLike });
 
-export const removeDislikeReply = (idReply, idDisLike) =>
+export const removeDislikeReply = (idReply, idDislike) =>
   API.put(`/replys/removeDislikeReply/${idReply}`, { idDislike });
