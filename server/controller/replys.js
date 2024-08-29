@@ -431,7 +431,6 @@ const removeAddDisLike = async (req, res) => {
     return res.status(400).josn({ success: false, message: "nont null" });
   }
   try {
-    console.log(idDislike);
     const data = await replys.findOneAndUpdate(
       { "replyss._id": id },
       {
