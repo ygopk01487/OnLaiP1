@@ -759,7 +759,7 @@ const ProductDetail = () => {
 
     if (!userOther) {
       //kiem tra neu user da dislike khi bam like thi xoa di
-      let a = dataByCm[0].replyss;
+      let a = dataByCm[0].replyss.filter((i) => i._id === idRl);
       let dislikeUser;
       for (let i of a) {
         dislikeUser = i?.dislike.filter((t) => t.user === idUser);
@@ -776,11 +776,11 @@ const ProductDetail = () => {
       data = await addLikeReplys(idUser, null, id, idRl, 1, idRv);
     } else {
       //kiem tra neu user da dislike khi bam like thi xoa di
-      let a = dataByCm[0].replyss;
+      let a = dataByCm[0].replyss.filter((i) => i._id === idRl);
       let dislikeUserOther;
       for (let i of a) {
         dislikeUserOther = i?.dislike.filter(
-          (t) => t.userOther.toString() === idUserOther
+          (t) => t.userOther === idUserOther
         );
       }
 
@@ -809,9 +809,10 @@ const ProductDetail = () => {
     const userOther = JSON.parse(window.sessionStorage.getItem("user"));
     let data;
     const dataByCm = dataRePly.filter((i) => i.idComment.idReviewUser === idCm);
+
     if (!userOther) {
       //kiem tra neu user da like khi bam like thi xoa di
-      let a = dataByCm[0].replyss;
+      let a = dataByCm[0].replyss.filter((i) => i._id === idRl);
       let likeUser;
       for (let i of a) {
         likeUser = i?.like.filter((t) => t.user === idUser);
@@ -829,12 +830,10 @@ const ProductDetail = () => {
       data = await addDislikeReplys(idUser, null, id, idRl, 1, idRv);
     } else {
       //kiem tra neu user da like khi bam like thi xoa di
-      let a = dataByCm[0].replyss;
+      let a = dataByCm[0].replyss.filter((i) => i._id === idRl);
       let likeUserOther;
       for (let i of a) {
-        likeUserOther = i?.like.filter(
-          (t) => t.userOther.toString() === idUserOther
-        );
+        likeUserOther = i?.like.filter((t) => t.userOther === idUserOther);
       }
 
       if (likeUserOther.length > 0) {
